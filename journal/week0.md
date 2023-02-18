@@ -72,3 +72,34 @@ Here is a picture of the chart and also the link to the actual chart I created.
 
 - #### Link to the chart
 [Cruddur Architectural Diagram Link](https://lucid.app/lucidchart/12786108-6aad-4199-9d84-3b9eafda0bef/edit?view_items=tm6xBl9_h0hH&invitationId=inv_f35934e1-0b84-4e4a-b664-1e28c9322d98)
+
+
+## More HouseKeeping
+
+- ### Adding the Gitpod Button to Github
+
+To add the gitpod button to my github I had to add the gitpod chrom extension shown below,  simply search for it either directly on chrome extension marketplace or directly on Google.
+
+- #### Gitpod Chrome Extension
+![Gitpod Chrome Extension](./imgs/gitpod3.png "Gitpod Chrome Extension")
+
+![Gitpod Chrome Extension](./imgs/gitpod4.png "Gitpod Chrome Extension")
+
+Click on "Add to Chrome" and when a popup comes up click the "Add Extension"
+
+![Gitpod Chrome Extension](./imgs/gitpod5.png "Gitpod Chrome Extension")
+
+![Gitpod Chrome Extension](./imgs/gitpod6.png "Gitpod Chrome Extension")
+
+- #### Before the Gitpod Button
+![Before Gitpod Button](./imgs/gitpod1.png "Before Gitpod Button")
+
+- #### After: Gitpod Button Added
+![After: Gitpod Button Added](./imgs/gitpod2.png "After: Gitpod Button Added")
+
+## AWS CLI
+
+Installing the AWS CLI should probably be under housekeeping but I decided to give it a section of it's own.
+So our instructor wisely adviced us install the AWS CLI directly in the workspace directory instead of the specific directory that is being worked with.
+
+After installing the AWS CLI I added the config file to the .gitpod.yml file so that everytime i create a new workspace it is installed automatically without any input from me.
