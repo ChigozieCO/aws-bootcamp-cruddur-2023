@@ -13,7 +13,7 @@ Week 0 to me was essientially housekeeping week, although there were prerequisit
 
 The housekeeping tasks I completed this week are mentioned below:
 
-- ### Added a Virtual MFA Device to my AWS root account
+:sparkles: -  ### Added a Virtual MFA Device to my AWS root account
 
 Security is a very big consideration for me as I am in the cloud security space and so adding a virtual authentication device to my root account was one of the first steps I took after creating my AWS account. This is essential to provide an additional layer of protection to the account because a compromised AWS root account is the very worst thing that can happen to any organisation or even indiviual.
 
