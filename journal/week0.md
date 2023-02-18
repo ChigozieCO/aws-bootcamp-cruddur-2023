@@ -39,5 +39,5 @@ Cloudwatch alarms can be in either an "In alarm" state, an "ok" state or an "Ins
 
 The alarm was set to send an sns notification when the EstimatedCharges >= 5 for datapoints within 6 hours.
 
-![My Billing Alarm](img src="./billing1.png")
+![My Billing Alarm](./billing1.png)
 
