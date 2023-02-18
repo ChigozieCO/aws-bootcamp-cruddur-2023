@@ -39,8 +39,20 @@ Cloudwatch alarms can be in either an "In alarm" state, an "ok" state or an "Ins
 
 The alarm was set to send an sns notification when the EstimatedCharges >= 5 for datapoints within 6 hours.
 
+- #### Billing Alarm
 ![My Billing Alarm](./imgs/billing1.png "Billing Alarm")
 
+
+- ### Created an AWS Budget
+
+In addition to creating a billing alarm it is necessary to create a budget as billing alarms are limited compared to budgets. Billing alarm represents only the amount that has already been charged. Whereas a budget can alarm us based on forecasted charges, which would give us a bit of head up to figure out what's happening before we get hit with excess bill usage. 
+
+I used the zero spend AWS budget template to create a budget that would alert me when my AWS spending exceeds $0.01 which is above the AWS Free Tier limits.
+
+Ideally I would have also created a budget for credits as well to track and forcast the spending of what AWS credits I have but as at the time of writing this I have no AWS credit so that would wait till I do get my hands on some credit.
+
+- #### AWS Budget
+![My AWS Budget](./imgs/AWSBudget.png "AWS Budget")
 
 ## Architectural Diagram
 
@@ -51,8 +63,8 @@ With Lucid chart I recreated the logical diagram of the app this project is most
 
 Here is a picture of the chart and also the link to the actual chart I created.
 
-#### Lucid chart logical diagram
+- #### Lucid chart logical diagram
 ![Cruddur Architectural Diagram](./imgs/CruddurArchitecture.png "Cruddur Logical Diagram")
 
-#### Link to the chart
+- #### Link to the chart
 [Cruddur Architectural Diagram Link](https://lucid.app/lucidchart/12786108-6aad-4199-9d84-3b9eafda0bef/edit?view_items=tm6xBl9_h0hH&invitationId=inv_f35934e1-0b84-4e4a-b664-1e28c9322d98)
