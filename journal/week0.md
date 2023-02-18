@@ -28,4 +28,16 @@ This group was given AdministratorAccess. AdministratorAccess provides full acce
 
 I also created access key for this user. This is necessary as I will use this access key to enable the AWS CLI to access my AWS account via the command line.
 
-- ### 
+## Pricing Consideration
+
+- ### Created Billing Alarm
+
+I created a billing alarm to be able to track spend in AWS throughout the project. This is to ensure I do not go over the free tier limit and even if we do I am quickly alerted to that spend.
+
+A billing alarm is created from cloudwatch
+Cloudwatch alarms can be in either an "In alarm" state, an "ok" state or an "Insufficient" state.
+
+The alarm was set to send an sns notification when the EstimatedCharges >= 5 for datapoints within 6 hours.
+
+![My Billing Alarm](./journal/imgs/billing1.png)
+
