@@ -39,5 +39,20 @@ Cloudwatch alarms can be in either an "In alarm" state, an "ok" state or an "Ins
 
 The alarm was set to send an sns notification when the EstimatedCharges >= 5 for datapoints within 6 hours.
 
-![My Billing Alarm](./imgs/billing1.png)
+![My Billing Alarm](./imgs/billing1.png "Billing Alarm")
 
+
+## Architectural Diagram
+
+Using Lucid chart I recreated the Cruddur Architectural diagram.
+Lucid chart is a very quick study and very semaless to use, even if I have used it's alternative draw.io in the past making the switch to lucid chart was quite easy.
+
+With Lucid chart I recreated the logical diagram of the app this project is mostly based upon. In the coming weeks we will draw from this chart and piece all the parts together. This chart is hopefully clear enough for even nontechnical people to understand as it details the operational flow from user to database within the app.
+
+Here is a picture of the chart and also the link to the actual chart I created.
+
+#### Lucid chart logical diagram
+![Cruddur Architectural Diagram](./imgs/CruddurArchitecture.png "Cruddur Logical Diagram")
+
+#### Link to the chart
+[Cruddur Architectural Diagram Link](https://lucid.app/lucidchart/12786108-6aad-4199-9d84-3b9eafda0bef/edit?view_items=tm6xBl9_h0hH&invitationId=inv_f35934e1-0b84-4e4a-b664-1e28c9322d98)
