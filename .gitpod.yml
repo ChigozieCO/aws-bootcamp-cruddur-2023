@@ -9,6 +9,11 @@ tasks:
       sudo ./aws/install
       cd $THEIA_WORKSPACE_ROOT
 
+  - name: npm-install
+    init: |
+      cd /workspace/aws-bootcamp-cruddur-2023/frontend-react-js
+      npm i 
+      exit
       
 vscode:
   extensions:
