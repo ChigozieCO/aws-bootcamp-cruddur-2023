@@ -10,7 +10,7 @@ I previously had docker desktop installed on my local machine which I had been u
 After updating, docker desktop developed issues and kept failing to start, after multiple failed troubleshooting attempts I tried to uninsatlling, deleting the previous docker files and reinstalling docker desktop multiple times but I kept experiencing the same issue (screenshot below).
 
 - #### Billing Alarm
-![Docker Desktop Error](./imgs/DDsktp error.png "Docker Error")
+![Docker Desktop Error](./imgs/DDsktpError.png "Docker Error")
 
 After struggling with this error for a long while I decided to install Docker directly and do away with Docker desktop.
 
