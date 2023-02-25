@@ -41,7 +41,7 @@ I created a Dockerfile in the backend duirectory on my local computer then ran t
 docker build -t  backend-flask ./backend-flask
 ```
 
-#### Screenshots of the image being built on my local machine
+- #### Screenshots of the image being built on my local machine
 
 ![Image being built](./imgs/DckBuild.png "Docker Error")
 
@@ -54,7 +54,7 @@ To run the backend container from the Backend image, I ran the code:
 ```
 docker run --rm -p 4567:4567 -it -e FRONTEND_URL='*' -e BACKEND_URL='*' backend-flask
 ```
-#### The backend container running on my local machine
+- #### The backend container running on my local machine
 
 ![Container running CLI](./imgs/rCli.png "Container running CLI")
 
@@ -65,3 +65,18 @@ docker run --rm -p 4567:4567 -it -e FRONTEND_URL='*' -e BACKEND_URL='*' backend-
 I created a Dockefile in the frontend directory and saved the configuration of the container.
 
 On trying to run npm Install before building the container because it is needed to copy the contents of node_modules I ran into an "npm: command not found error" message. To solve this problem I installed [node.js](https://nodejs.org/en/download/) on my local machine then reran `npm i`.
+
+## Pushing the Images to Docker Hub
+
+To push the images to docker hub I needed to login to my Docker hub account through the Cli but i got the error "Error: Cannot perform an interactive login from a not TTY device" after troubleshooting I found out way to circumvent that is to add `winpty` at the beginning of my command (it enables TTY on Windows, useful for GitBash, Putty and MobaXTerm) and so the code read as shown below:
+
+```
+winpty docker login -u <myusername>
+```
+
+- #### Cli Docker Hub login
+
+![Cli Docker Hub Login](./imgs/Clihub.png "C1i Docker Hub login")
+
+I decided to place both the Frontend image and the Backend image in the same repo, differentiating them with tags.
+
