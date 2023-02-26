@@ -76,8 +76,8 @@ docker build -t frontend-react-js ./frontend-react-js
 Here's a screenshot I took of my Cli on completion of the image build and another screenshot of my Docker Desktop showing the images I have available on my local machine.
 
 - #### Images available on my local machine (Docker Desktop)
-![Images on Local Machine](./FrtndBuild.png)
-![Images on Local Machine](./AvlImgs.png)
+![Images on Local Machine](./imgs/FrtndBuild.png)
+![Images on Local Machine](./imgs/AvlImgs.png)
 
 ### Running the Frontend Container
 
