@@ -104,3 +104,25 @@ winpty docker login -u <myusername>
 
 I decided to place both the Frontend image and the Backend image in the same repo, differentiating them with tags.
 
+First i ran the `docker ps` command to check if I had any running containers.
+
+To get the image ID I ran the `docker images` command. The image ID is necessary for tagging the image.
+
+Next thing I did was to tag the image and finally pushing it to Docker Hub.
+
+**To tag the image**
+```
+ docker tag c612f44827f6 chigoziena/cruddur:backend-flask
+```
+
+**Pushing the image**
+
+```
+docker push chigoziena/cruddur:backend-flask
+```
+
+![Pushing the image CLI](https://user-images.githubusercontent.com/107365067/221431943-d431ce2f-e530-44b6-a55a-e9dccebe27b4.png)
+
+![Pushing the image CLI](https://user-images.githubusercontent.com/107365067/221432175-c7b8d1d4-9e34-4db6-8436-51d4a5526f9c.png)
+
+
