@@ -64,7 +64,31 @@ docker run --rm -p 4567:4567 -it -e FRONTEND_URL='*' -e BACKEND_URL='*' backend-
 
 I created a Dockefile in the frontend directory and saved the configuration of the container.
 
+### Building the Frontend Image
+
 On trying to run npm Install before building the container because it is needed to copy the contents of node_modules I ran into an "npm: command not found error" message. To solve this problem I installed [node.js](https://nodejs.org/en/download/) on my local machine then reran `npm i`.
+
+After this I was able to build the image by running 
+
+```
+docker build -t frontend-react-js ./frontend-react-js
+```
+Here's a screenshot I took of my Cli on completion of the image build and another screenshot of my Docker Desktop showing the images I have available on my local machine.
+
+- #### Images available on my local machine (Docker Desktop)
+![Images on Local Machine](./FrtndBuild.png)
+![Images on Local Machine](./AvlImgs.png)
+
+### Running the Frontend Container
+
+To run the image, the below code was run
+
+```
+docker run -p 3000:3000 -d frontend-react-js
+```
+
+- #### Frontend running on my local machine
+![Frontend container running on Local Machine](./imgs/)
 
 ## Pushing the Images to Docker Hub
 
@@ -76,7 +100,7 @@ winpty docker login -u <myusername>
 
 - #### Cli Docker Hub login
 
-![Cli Docker Hub Login](./imgs/Clihub.png "C1i Docker Hub login")
+![Cli Docker Hub Login](./imgs/CliHub.png "C1i Docker Hub login")
 
 I decided to place both the Frontend image and the Backend image in the same repo, differentiating them with tags.
 
