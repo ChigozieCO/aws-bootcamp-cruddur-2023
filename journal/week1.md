@@ -86,9 +86,12 @@ To run the image, the below code was run
 ```
 docker run -p 3000:3000 -d frontend-react-js
 ```
+While I was able to run the frontend container locally (on my local machine), it made my computer very slow to the point of it beung inoperable (I have a 4gb ram system). This issue did not allow me take a screenshot of the running container.
 
-- #### Frontend running on my local machine
-![Frontend container running on Local Machine](./imgs/)
+The errors I got as I tried to run the container include:
+
+- "Failed to complie" : To solved this, I deleted the node_module folder and installed npm all over again.
+- "React not defined" : To solve this I added the following line to the index.js file `window.React = React`. I found that this solved my problem.
 
 ## Pushing the Images to Docker Hub
 
@@ -115,14 +118,50 @@ Next thing I did was to tag the image and finally pushing it to Docker Hub.
  docker tag c612f44827f6 chigoziena/cruddur:backend-flask
 ```
 
+```
+docker tag 0ec0b4e9d471 chigoziena/cruddur:frontend-react-js
+```
+
 **Pushing the image**
 
 ```
 docker push chigoziena/cruddur:backend-flask
 ```
 
+```
+docker push chigoziena/cruddur:frontend-react-js
+```
+
+Pushing the frontend image was a very tough nut to crack, it took me roughly a whole day for it to complete pushing.
+
+- ##### Backend
 ![Pushing the image CLI](https://user-images.githubusercontent.com/107365067/221431943-d431ce2f-e530-44b6-a55a-e9dccebe27b4.png)
 
 ![Pushing the image CLI](https://user-images.githubusercontent.com/107365067/221432175-c7b8d1d4-9e34-4db6-8436-51d4a5526f9c.png)
 
+- #### Frontend
+![Pushing the image CLI](https://user-images.githubusercontent.com/107365067/222016606-8568244b-3f80-44fa-8398-97dce4de5854.png)
+
+- #### Screenshot of Docker Hub repo Showing the Available Images.
+![Docker Hub Images](https://user-images.githubusercontent.com/107365067/222016716-6eaba494-c79e-47f1-bcf2-5f2c652e7a03.png)
+
+
+## Implement a Healthcheck in the V3 Docker compose file
+
+To implement a health check in the Docker compose file, I added the below code:
+
+```
+healthcheck:
+  test: ["curl", "-f", "http://localhost"]
+  interval: 1m30s
+  timeout: 10s
+  retries: 3
+  start_period: 40s
+```
+
+Since this health check is based on curl I needed to ensure that curl is installed within the image used for running the service. so I also added the below line of code to the docker compose file:
+
+```
+RUN apk --update --no-cache add curl
+```
 
