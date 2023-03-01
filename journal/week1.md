@@ -145,6 +145,8 @@ Pushing the frontend image was a very tough nut to crack, it took me roughly a w
 - #### Screenshot of Docker Hub repo Showing the Available Images.
 ![Docker Hub Images](https://user-images.githubusercontent.com/107365067/222016716-6eaba494-c79e-47f1-bcf2-5f2c652e7a03.png)
 
+- #### Link to the Docker Hub Repo
+[Cruddur Repo](https://hub.docker.com/r/chigoziena/cruddur/tags)
 
 ## Implement a Healthcheck in the V3 Docker compose file
 
