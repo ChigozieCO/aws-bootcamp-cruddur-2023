@@ -13,7 +13,6 @@ tasks:
     init: |
       cd /workspace/aws-bootcamp-cruddur-2023/frontend-react-js
       npm i 
-      exit
       
 
   - name: postgres
