@@ -18,7 +18,7 @@ export default function RecoverPage() {
     setErrors('')
     Auth.forgotPassword(username)
     .then((data) => setFormState('confirm_code') )
-    .catch((err) => setCognitoErrors(err.message) );
+    .catch((err) => setErrors(err.message) );
     return false
   }
   const onsubmit_confirm_code = async (event) => {
