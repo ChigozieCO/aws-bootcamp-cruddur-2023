@@ -1,10 +1,13 @@
 from psycopg_pool import ConnectionPool
 import os
 import re
+import sys
 
 class db:
   def __init__(self):
     self.init_pool()
+
+  def template(name):
 
   def init_pool(self):
     connection_url = os.getenv("CONNECTION_URL")
