@@ -4,12 +4,12 @@ import re
 import sys
 from flask import current_app as app
 
-class db:
+class Db:
   def __init__(self):
     self.init_pool()
 
   def template(self,*args):
-    pathing = list((app.root_path,'db','sql','activities',) + args)
+    pathing = list((app.root_path,'db','sql',) + args)
     pathing[-1] = pathing[-1] + ".sql"
 
     template_path = os.path.join(*pathing)
@@ -26,7 +26,7 @@ class db:
   def init_pool(self):
     connection_url = os.getenv("CONNECTION_URL")
     self.pool = ConnectionPool(connection_url)
-  # We want to commit query such as an insert
+  # we want to commit data such as an insert
   # be sure to check for RETURNING in all uppercases
   def print_params(self,params):
     blue = '\033[94m'
@@ -60,20 +60,20 @@ class db:
   # when we want to return a json object
   def query_array_json(self,sql,params={}):
     self.print_sql('array',sql)
-    
+
     wrapped_sql = self.query_wrap_array(sql)
     with self.pool.connection() as conn:
       with conn.cursor() as cur:
         cur.execute(wrapped_sql,params)
         json = cur.fetchone()
         return json[0]
-  # when we want to return an array of json objects
+  # When we want to return an array of json objects
   def query_object_json(self,sql,params={}):
 
     self.print_sql('json',sql)
     self.print_params(params)
     wrapped_sql = self.query_wrap_object(sql)
-    
+
     with self.pool.connection() as conn:
       with conn.cursor() as cur:
         cur.execute(wrapped_sql,params)
@@ -110,3 +110,5 @@ class db:
     # print the pgcode and pgerror exceptions
     print ("pgerror:", err.pgerror)
     print ("pgcode:", err.pgcode, "\n")
+
+db = Db()
