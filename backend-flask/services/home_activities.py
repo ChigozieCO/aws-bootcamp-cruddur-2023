@@ -14,5 +14,5 @@ class HomeActivities:
     #  now = datetime.now(timezone.utc).astimezone()
     #  span.set_attribute("app.now", now.isoformat)
     sql = db.template('activities','home')
-    results = db.query_array_json(sql,sql)
+    results = db.query_array_json(sql)
     return results
