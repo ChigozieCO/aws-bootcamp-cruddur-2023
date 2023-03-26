@@ -1,11 +1,5 @@
 #!/usr/bin/bash
 
-CYAN='\033[1;36m'
-NO_COLOR='\033[0m'
-
-LABEL="db-schema-load"
-printf "${CYAN}== ${LABEL}${NO_COLOR}\n"
-
 # npm install frontend
 cd /workspaces/aws-bootcamp-cruddur-2023/frontend-react-js && npm update -g && npm i;
 
