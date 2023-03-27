@@ -13,5 +13,5 @@ sudo apt update
 sudo apt install -y postgresql-client-13 libpq-dev
 
 # Update rds security rules
-# export CODESPACES_IP=$(curl ifconfig.me)
-# source /workspaces/aws-bootcamp-cruddur-2023/backend-flask/bin/rds-update-sg-rule
+export CODESPACES_IP=$(curl ifconfig.me)
+source /workspaces/aws-bootcamp-cruddur-2023/backend-flask/bin/rds/update-sg-rule
