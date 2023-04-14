@@ -1,4 +1,5 @@
-FROM ${ECR_PYTHON_URL}:3.10-slim-buster
+ARG baseimage
+FROM ${baseimage}
 
 # Inside the container
 # Make a new folder inside the container

@@ -21,7 +21,10 @@ services:
       ROLLBAR_ACCESS_TOKEN: "${ROLLBAR_ACCESS_TOKEN}"
       AWS_COGNITO_USER_POOL_ID: "${AWS_COGNITO_USER_POOL_ID}"
       AWS_COGNITO_USER_POOL_CLIENT_ID: "1j3u0n7jp0i4rfi2g1lqsano3m"
-    build: ./backend-flask
+    build: 
+      context: ./backend-flask
+      args:
+        baseimage: "${ECR_PYTHON_URL}:3.10-slim-buster"
     ports:
       - "4567:4567"
     volumes:
