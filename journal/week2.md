@@ -192,6 +192,171 @@ I created an `xray.json` file in the aws/json folder to which I added the below 
 }
 ```
 
+The above code simply defines the sampling ruole to be created and the command below is the code I ran to create the sampling rule using AWS cli:
+
+```
+aws xray create-sampling-rule --cli-input-json file://aws/json/xray.json
+```
+
+After all this I proceeded to run docker compose up to see the data collected by X-Ray.
+
+- #### Adding custom segment/subsegment
+
+To further filter X-Ray tracing, I created a subsegment by adding codes to [`user_activities.py`](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/blob/main/backend-flask/services/user_activities.py)
+
+```py
+from aws_xray_sdk.core import xray_recorder
+...
+...
+    now = datetime.now(timezone.utc).astimezone()
+      model = {
+        'errors': None,
+        'data': None
+      }
+...
+```
+
+With this I was then able to get data in my subsegments.
+
+![XraySubSeg](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/1a71f2c4-a536-45eb-acc5-abb5fbd32a3d)
 
 
+## CloudWatch
+
+- #### Install WatchTower
+
+To implement cloudwatch logs first I needed to install watchtower so I added the watchtower to my `requirements.txt` file
+
+```
+watchtower
+```
+Next I installed it by running
+
+```
+pip install -r requirements.txt
+```
+
+- #### Configure Cloudwatch
+
+THe next step was to configure the logger to use cloudwatch. To do this I inserted the below code into the `app.py` file:
+
+```py
+import watchtower
+import logging
+from time import strftime
+...
+...
+# Configuring Logger to Use CloudWatch
+LOGGER = logging.getLogger(__name__)
+LOGGER.setLevel(logging.DEBUG)
+console_handler = logging.StreamHandler()
+cw_handler = watchtower.CloudWatchLogHandler(log_group='cruddur')
+LOGGER.addHandler(console_handler)
+LOGGER.addHandler(cw_handler)
+LOGGER.info("some message")
+...
+...
+@app.after_request
+def after_request(response):
+    timestamp = strftime('[%Y-%b-%d %H:%M]')
+    LOGGER.error('%s %s %s %s %s %s', timestamp, request.remote_addr, request.method, request.scheme, request.full_path, response.status)
+    return response
+ ...   
+    data = HomeActivities.run(logger=LOGGER)
+ ```
  
+ I also added some codes to the `services/home_activities.py` file
+ 
+ ```py
+ import logging
+ ...
+ def run(logger):
+    logger.info("HomeActivities")
+ ```
+ 
+Also had to add the required env vars to the `docker-compose.yml` file:
+ 
+```py
+      AWS_DEFAULT_REGION: "${AWS_DEFAULT_REGION}"
+      AWS_ACCESS_KEY_ID: "${AWS_ACCESS_KEY_ID}"
+      AWS_SECRET_ACCESS_KEY: "${AWS_SECRET_ACCESS_KEY}"
+```
+
+With all these setup, I was then able to collect the required cloudwatch logs
+
+
+![CloudWatch](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/905a7c42-e380-4ed3-8734-bc83fdb9b06f)
+
+## Rollbar
+
+- #### Create account and set Env Vars
+
+The first step was to create a free rollbar account on [Rollbar}(https://rollbar.com)
+
+I then retreived the access tokens and set them to my code environment by running the below code:
+
+```sh
+export ROLLBAR_ACCESS_TOKEN="######"
+gp env ROLLBAR_ACCESS_TOKEN="######"
+```
+
+- #### Install Rollbar
+
+As usual I added the needed dependencies to my `requirements.txt` file
+
+```
+blinker
+rollbar
+```
+
+Then installed the requiredments by running:
+
+```
+pip install -r requirements.txt
+```
+
+I then added env vars to the `docker-compose.yml` file
+
+```sh
+ROLLBAR_ACCESS_TOKEN: "${ROLLBAR_ACCESS_TOKEN}"
+```
+
+The next step was to integrate rollbar into our app in other to fully utilize it's error logging funtionalities. To do this i added the code below to my `app.py` file:
+
+```py
+import rollbar
+import rollbar.contrib.flask
+from flask import got_request_exception
+...
+...
+rollbar_access_token = os.getenv('ROLLBAR_ACCESS_TOKEN')
+@app.before_first_request
+def init_rollbar():
+    """init rollbar module"""
+    rollbar.init(
+        # access token
+        rollbar_access_token,
+        # environment name
+        'production',
+        # server root directory, makes tracebacks prettier
+        root=os.path.dirname(os.path.realpath(__file__)),
+        # flask already sets up logging
+        allow_logging_basic_config=False)
+
+    # send exceptions from `app` to rollbar, using flask's signal system.
+    got_request_exception.connect(rollbar.contrib.flask.report_exception, app)
+   ...
+   
+   
+   #endpoint to test rollbar
+@app.route('/rollbar/test')
+def rollbar_test():
+    rollbar.report_message('Hello World!', 'warning')
+    return "Hello World!"
+```
+
+Then I ran `docker compose up` and was able to collect errors in my rollbar account.
+
+
+
+
