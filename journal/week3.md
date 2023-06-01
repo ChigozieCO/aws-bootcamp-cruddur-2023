@@ -72,7 +72,7 @@ To integrate cognito into the containerized app I added the below lines of code 
 
 ### Configure Content to Show based on Login Status
 
-After creating users in the cognito user pool and verifying the ability to login into the app the next thing I did was to customize the home-feed page to deliver content based on authentication status. 
+We need to customize the homefeed page to deliver content based on authentication status. This is necessary to curtail information leakage from the app and encourage visitors to create an account on the app and sign in to use the app. Unauthenticated users will not be able to enjoy the full benefit of the app until the sign into the app.
 
 The `HomeFeedPage.js` page was modified to deliver limited content to unautenticated users and unlimited content to authenticated users.
 
@@ -103,6 +103,47 @@ const checkAuth = async () => {
 
 ```
 
+### Enable user signin
+
+I created a user directly from my cognito user pool in other to verify that cognito was setup properly. 
+
+As the user was created directly from cognito interface, I needed the user to be verified and so I ran the below code to enable verification of the user.
+
+```yml
+aws cognito-idp admin-set-user-password \
+--user-pool-id <your-user-pool-id> \
+--username <username> \
+--password <password> \
+--permanent
+```
+
+For the user to interact with the app by signing in and enjoying the content, I need implement the sign in page to allow sign in. To do this I modified the `signinpage.js` page with the code below:
+
+```py
+import { Auth } from 'aws-amplify';
+
+...
+...
+
+const onsubmit = async (event) => {
+    setErrors('')
+    event.preventDefault();
+    Auth.signIn(email, password)
+    .then(user => {
+      console.log('user',user)
+      localStorage.setItem("access_token", user.signInUserSession.accessToken.jwtToken)
+      window.location.href = "/"
+    })
+    .catch(error => {
+      if (error.code == 'UserNotConfirmedException') {
+        window.location.href = "/confirm"
+      }
+      setErrors(error.message)
+      });
+    return false
+  }
+```
+
 ### Enable user signout
 
 In other to allow signed in users the ability to sign out, we modified the SignOut block of code in the `ProfileInfo.js` file.
@@ -120,6 +161,132 @@ import { Auth } from 'aws-amplify';
     }
 }
 ```
+
+# Implement Pages
+
+Before now I created a user directly from the cognito user pool interface on AWS but this is not the conventional way with which app users will interact with the app. The users will need to signup on the application itself, comfirm their sign up with the code that will be sent to their email and then have the ability to sign in and out of the app. 
+
+We implemented signing in and signing out of the app already above so next we will implement the sign up page, confiemation page and recovery page in the following sections.
  
+ # Implement Signup Page
+ 
+ This page will allow visitors create accounts on tghe app. To do this we will modify the SignupPage.js file with the below code:
+ 
+ ```py
+ import { Auth } from 'aws-amplify';
+ 
+ ...
+ ...
+ 
+   const onsubmit = async (event) => {
+    event.preventDefault();
+    setErrors('')
+    try {
+      const { user } = await Auth.signUp({
+        username: email,
+        password: password,
+        attributes: {
+          name: name,
+          email: email,
+          preferred_username: username,
+        },
+        autoSignIn: { // optional - enables auto sign in after user is confirmed
+            enabled: true,
+        }
+      });
+      console.log(user);
+      window.location.href = `/confirm?email=${email}`
+    } catch (error) {
+        console.log(error);
+        setErrors(error.message)
+    }
+    return false
+  }
+```
+
+# Implement Confirmation Page
+
+After a user creates an account, a confirmation code will be sent to their email to confirm the action creation. For this conmfirmation to be successful I needed to implement the confirmation page. This was done by modifying the ConfirmationPage.js file with the code below:
+
+```py
+import { Auth } from 'aws-amplify';
+
+...
+...
+
+ const resend_code = async (event) => {
+    setErrors('')
+    try {
+      await Auth.resendSignUp(email);
+      console.log('code resent successfully');
+      setCodeSent(true)
+    } catch (err) {
+      // does not return a code
+      // does cognito always return english
+      // for this to be an okay match?
+      console.log(err)
+      if (err.message == 'Username cannot be empty'){
+        setErrors("You need to provide an email in order to send Resend Activiation Code")   
+      } else if (err.message == "Username/client id combination not found."){
+        setErrors("Email is invalid or cannot be found.")   
+      }
+    }
+  }
+ 
+ ...
+ ...
+ 
+   const onsubmit = async (event) => {
+    event.preventDefault();
+    setErrors('')
+    try {
+      await Auth.confirmSignUp(email, code);
+      window.location.href = "/"
+    } catch (error) {
+      setErrors(error.message)
+    }
+    return false
+  }
+```
+# Implement Recover Page
+
+This page will allow users recover their username or password in the envent that the forget either of them. We modify the `RecoverPage.js` file for this.
+
+```py
+import { Auth } from 'aws-amplify';
+
+...
+...
+
+  const onsubmit_send_code = async (event) => {
+    event.preventDefault();
+    setErrors('')
+    Auth.forgotPassword(username)
+    .then((data) => setFormState('confirm_code') )
+    .catch((err) => setCognitoErrors(err.message) );
+    return false
+  }
+  
+  const onsubmit_confirm_code = async (event) => {
+    event.preventDefault();
+    setErrors('')
+    if (password == passwordAgain){
+      Auth.forgotPasswordSubmit(username, code, password)
+      .then((data) => setFormState('success'))
+      .catch((err) => setErrors(err.message) );
+    } else {
+      setErrors('Passwords do not match')
+    }
+    return false
+  }
+```
+
+All these changes made it possi ble for users to create accounts and interact with the app.
+
+![App users](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/38fd9929-fcb8-4e84-847b-f6eff329c713)
+
+
+
+
 
 
