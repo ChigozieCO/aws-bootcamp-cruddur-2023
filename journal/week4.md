@@ -2,6 +2,10 @@
 
 This week we created our databases. We created both a local Postgres database on my local machine and also a retaional database with a Progres engine on AWS.
 
+We also put automation in progress by writing a bunch of scripts to automate a lot of the repititive tasks we will we doing.
+
+We configured a Lambda function as well.
+
 # Create RDS
 
 The first thing I did was create an RDS instance on AWS using the command line. The code below was what was used in creating the RDS instance:
@@ -76,6 +80,24 @@ export CONNECTION_URL="postgresql://postgres:<password>@localhost:5432/cruddur"
 gp env CONNECTION_URL="postgresql://postgres:<password>@localhost:5432/cruddur"
 ```
 
+### Add Connection Urls to Config
+
+After setting up our connection url and our prod connection url the next thing to do is to add them our docker compose file so that our container can find and use them when the need arises.
+
+In my docker compose file I will name both the local database connection url and the prod connection url as connection url and depending on which is to be used at any point the other will be commented out.
+
+That is to say that if I am working in production, then the local connection url will be commented out and vise versa.
+
+In the `docker-compose.yml` file:
+
+```yml
+services:
+  backend-flask:
+    environment:
+      CONNECTION_URL: postgresql://postgres:<password>@db:5432/cruddur
+      #CONNECTION_URL: "${PROD_CONNECTION_URL}"
+```
+
 ### Common PSQL commands
 
 ```sql
@@ -118,7 +140,14 @@ NO_COLOR='\033[0m'
 LABEL="db-connect"
 printf "${CYAN}== ${LABEL}${NO_COLOR}\n"
 
-psql $CONNECTION_URL
+if [ "$1" == "prod" ]; then
+    echo "Running in production mode"
+    URL=$PROD_CONNECTION_URL
+else
+    URL=$CONNECTION_URL
+fi
+
+psql $URL
 ```
 
 The first line of code is called a shebang and its use is to tell the script what shell it would run wth.
@@ -256,7 +285,7 @@ VALUES
 
 ### Script to Seed Data
  
-THis script is called db-seed, it is a bash script that is used to input the above seed data into our schema which schould already have been loaded on our database.
+This script is called db-seed, it is a bash script that is used to input the above seed data into our schema which schould already have been loaded on our database.
 
 ```sh
 #!/usr/bin/bash
@@ -333,6 +362,168 @@ source "$bin_path/db-create"
 source "$bin_path/db-schema-load"
 source "$bin_path/db-seed"
 ```
+
+### Script to Allow connection to the AWS RDS Instance.
+
+By default our RDS instance will only allow traffic from the default security group, this is to secure our database and limit it's interaction with ecternal factors whether malicious or otherwise.
+
+Therefore we need to add an inbound rule to allow traffice from our IDE to the RDS.
+
+I interchanglably use Gitpod and Github codespaces and so I will add inbound rules to allow tracffice from both IDEs.
+
+The first step is to save the security group id and security rule id as env vars. This is done as shown below:
+
+```sh
+export DB_SG_ID="<redacted>"
+gp env DB_SG_ID="<redacted>"
+
+export DB_SG_RULE_ID="<redacted>"
+gp env DB_SG_RULE_ID="<redacted>"
+```
+
+I also set the IP address of my IDE as an env variable but here I will not hard code the value because it changes with each relaunch of the IDE.
+
+The command below is what I use to set my IDE IP for both Gitpod and Codespaces.
+
+```sh
+GITPOD_IP=$(curl ifconfig.me)
+CODESPACES_IP=$(curl ifconfig.me)
+```
+
+Now I go ahead and create my script which is named `update-sg-rule` and save in `backend-flask/bin/rds/`
+
+```sh
+#!/usr/bin/bash
+
+CYAN='\033[1;36m'
+NO_COLOR='\033[0m'
+LABEL="rds-update-sg-rule"
+printf "${CYAN}== ${LABEL}${NO_COLOR}\n"
+
+# When using Gitpod
+aws ec2 modify-security-group-rules \
+    --group-id $DB_SG_ID \
+    --security-group-rules "SecurityGroupRuleId=$DB_SG_RULE_ID,SecurityGroupRule={Description=GITPOD,IpProtocol=tcp,FromPort=5432,ToPort=5432,CidrIpv4=$GITPOD_IP/32}"
+    
+# When using Codespaces
+# aws ec2 modify-security-group-rules \
+#     --group-id $DB_SG_ID \
+#     --security-group-rules "SecurityGroupRuleId=$DB_SG_RULE_ID,SecurityGroupRule={Description=CODESPACES,IpProtocol=tcp,FromPort=5432,ToPort=5432,CidrIpv4=$CODESPACES_IP/32}"
+```
+
+Depending on which IDE I am using at the time, the other is commented out.
+
+The last step hers is to update my `.gitpod.yaml` file as well as my `postCreateCommand.sh` file to update my IDE IP address in the env var for Gitpod and Codespaces respectively on launch of whichever IDE.
+
+In my `.devContainer` directory I update my `postCreateCommand.sh` file to include the below:
+
+```sh
+# Update rds security rules
+export CODESPACES_IP=$(curl ifconfig.me)
+source /workspaces/aws-bootcamp-cruddur-2023/backend-flask/bin/rds/update-sg-rule
+```
+
+Next I update my `.gitpod.yml` file with the command below:
+
+```sh
+    command: |
+      export GITPOD_IP=$(curl ifconfig.me)
+      source "$THEIA_WORKSPACE_ROOT/backend-flask/bin/rds/update-sg-rule"
+```
+
+Now whenever I launch my IDEs their current IP is saved and the correct value is used to update my RDS security group rule.
+
+![Security group](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/37d70f63-e024-496e-bd4d-a84840492838)
+
+
+# Install Postgres client, Implement DB Object and Connection Pool
+
+### Add Psycopg Library to Requirements.
+
+To connect to the Postgres database, I need to include psycopg library to my `requirements.txt` file:
+
+```
+...
+psycopg[binary]
+psycopg[pool]
+```
+
+### Implement DB Object
+
+I created a new file `db.py` in the `backend-flask/lib/` directory and added the following lines of code:
+
+```py
+from psycopg_pool import ConnectionPool
+import os
+
+def query_wrap_object(template):
+  sql = f"""
+  (SELECT COALESCE(row_to_json(object_row),'{{}}'::json) FROM (
+  {template}
+  ) object_row);
+  """
+  return sql
+
+def query_wrap_array(template):
+  sql = f"""
+  (SELECT COALESCE(array_to_json(array_agg(row_to_json(array_row))),'[]'::json) FROM (
+  {template}
+  ) array_row);
+  """
+  return sql
+
+connection_url = os.getenv("CONNECTION_URL")
+pool = ConnectionPool(connection_url)
+```
+
+### Implement Connection Pool
+
+In the `home_activities.py` file I add these lines of code
+
+```py
+...
+from lib.db import pool, query_wrap_array
+...
+...
+      sql = query_wrap_array("""
+        SELECT
+          activities.uuid,
+          users.display_name,
+          users.handle,
+          activities.message,
+          activities.replies_count,
+          activities.reposts_count,
+          activities.likes_count,
+          activities.reply_to_activity_uuid,
+          activities.expires_at,
+          activities.created_at
+        FROM public.activities
+        LEFT JOIN public.users ON users.uuid = activities.user_uuid
+        ORDER BY activities.created_at DESC
+      """)
+      print("SQL-----------")
+      print(sql)
+      print("SQL-----------")
+
+      with pool.connection() as conn:
+          with conn.cursor() as cur:
+            cur.execute(sql)
+            # this will return a tuple
+            # the first field being the data
+            json = cur.fetchall()
+            json = cur.fetchone()
+      return json[0]
+      return results
+```
+
+# Lambda Function
+
+
+
+
+
+
+
 
 
 
