@@ -55,8 +55,8 @@ I saved this as the connection url for production.
 To  save it as an env var and persist it on git pod I used the below commands:
 
 ```bash
-export PROD_CONNECTION_URL="postgresql://cruddurroot:<password>@cruddur-db-instance.ca6twdsr0oxi.us-east-1.rds.amazonaws.com:5432/cruddur"
-gp env PROD_CONNECTION_URL="postgresql://cruddurroot:<password>@cruddur-db-instance.ca6twdsr0oxi.us-east-1.rds.amazonaws.com:5432/cruddur"
+export PROD_CONNECTION_URL="postgresql://cruddurroot:<password>@cruddur-db-instance.<redacted>.us-east-1.rds.amazonaws.com:5432/cruddur"
+gp env PROD_CONNECTION_URL="postgresql://cruddurroot:<password>@cruddur-db-instance.<redacted>.us-east-1.rds.amazonaws.com:5432/cruddur"
 ```
 
 # Create Local Database
@@ -363,13 +363,13 @@ source "$bin_path/db-schema-load"
 source "$bin_path/db-seed"
 ```
 
-### Script to Allow connection to the AWS RDS Instance.
+### Script to Allow Connection to the AWS RDS Instance.
 
 By default our RDS instance will only allow traffic from the default security group, this is to secure our database and limit it's interaction with ecternal factors whether malicious or otherwise.
 
-Therefore we need to add an inbound rule to allow traffice from our IDE to the RDS.
+Therefore we need to add an inbound rule to allow traffic from our IDE to the RDS.
 
-I interchanglably use Gitpod and Github codespaces and so I will add inbound rules to allow tracffice from both IDEs.
+I interchanglably use Gitpod and Github codespaces and so I will add inbound rules to allow traffic from both IDEs.
 
 The first step is to save the security group id and security rule id as env vars. This is done as shown below:
 
@@ -517,6 +517,136 @@ from lib.db import pool, query_wrap_array
 ```
 
 # Lambda Function
+
+### Create Lambda Function
+
+The Lambda function we will be creating here will insert new users and their details into our cruddur app database post confirmation of the user and this is why this function is named `cruddur-post-confirmation`.
+
+Through the AWS console I created a new Lambda function, it was setup as shown in the image below
+
+![cruddur-post-configuration function](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/0f3a8bf0-bb0c-49ea-8f70-83f8faac4182)
+
+### Add Layer
+
+I added a layer to the Lambda function in other to be able to use psycopg2 in the Lambda function.
+
+I selected the appropratiate arn from [here](https://github.com/jetbridge/psycopg2-lambda-layer) that matched my RDS region.
+
+THe settings for the layer is shown below:
+
+![Lambda Layer](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/89775a03-c257-4ae0-90bc-b74a2b3e5327)
+
+### Lambda Code
+
+In order to have all our code in our repo, we created a `cruddur-post-configuration.py` file in the `aws-bootcamp-cruddur-2023/aws/lambdas/` directory where I saved our Lambda function code.
+
+This was the same code I added to my Lambda function.
+
+The code can be seen below:
+
+```py
+import json
+import psycopg2
+import os
+
+def lambda_handler(event, context):
+    user = event['request']['userAttributes']
+    print('userAttributes')
+    print(user)
+
+    user_display_name = user['name']
+    user_email        = user['email']
+    user_handle       = user['preferred_username']
+    user_cognito_id   = user['sub']
+    try:
+        print('Entered try --------')
+        sql = f"""
+            INSERT INTO users (
+                display_name,
+                email,
+                handle,
+                cognito_user_id
+                ) 
+            VALUES(%s,%s,%s,%s)
+        """
+        print('SQL STATEMENT --------')
+        print(sql)
+        conn = psycopg2.connect(os.getenv('CONNECTION_URL'))
+        cur = conn.cursor()
+        params = [
+            user_display_name,
+            user_email,
+            user_handle,
+            user_cognito_id
+        ]
+        cur.execute(sql,params)
+        conn.commit() 
+
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        if conn is not None:
+            cur.close()
+            conn.close()
+            print('Database connection closed.')
+    return event
+```
+
+### Update Permissions
+
+For the function to adequately communicate with all the necesary services I had to add extra policy to the lambda role as the default role would not suffice.
+
+In the default role created with the Lambda, I clicked on `add permission`, clicked on `create Policy` and select `EC2` from the services provided and chose the JSON format to input the code below:
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ec2:CreateNetworkInterface",
+                "ec2:DeleteNetworkInterface",
+                "ec2:DescribeNetworkInterfaces",
+                "ec2:DescribeInstances",
+                "ec2:AttachNetworkInterface"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
+```
+
+![EC2 Policy](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/2eb3bb1b-618d-4c43-be0e-63a51b4d9ec7)
+
+I then add this new policy to the default role and save the changes
+
+![Lambda role](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/3d176286-5712-42f5-9ec8-317ad45c33a1)
+
+### Add Env Var
+
+The CONNECTION_URL is mentioned in the function code and so we need to add it as an env var that is accessible to our function.
+
+This is done by clicking on the Configurations tab of the function and selecting environment varibles, this where I will enter the CONNECTION_URL. The url here is the PROD_CONNECTION_URL which I setup earlier.
+
+![Lambda Env Var](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/afbf2fb9-e19f-4ae2-8812-25d5200a3ffe)
+
+![Function env var](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/36d8fb76-cdfa-4df1-8743-bb2d57e814c2)
+
+### Connect Function to a VPC
+
+Still in the configurations tab of the function, I clicked on the VPC sub category and connected the default VPC which is the same VPC connected to my RDS Instance.
+
+I connected the VPC and 2 subnets to the cruddur-post-configuration function and attached the required security group.
+
+
+
+
+
+
+
+
+
 
 
 
