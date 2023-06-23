@@ -621,7 +621,8 @@ In the default role created with the Lambda, I clicked on `add permission`, clic
 
 I then add this new policy to the default role and save the changes
 
-![Lambda role](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/3d176286-5712-42f5-9ec8-317ad45c33a1)
+![Lambda role](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/78ed006e-0877-4ad9-ab8a-5daec0948dbb)
+
 
 ### Add Env Var
 
