@@ -639,6 +639,16 @@ Still in the configurations tab of the function, I clicked on the VPC sub catego
 
 I connected the VPC and 2 subnets to the cruddur-post-configuration function and attached the required security group.
 
+# Add Lambda Trigger to Cognito
+
+After successfully configuring the cruddur-post-configuration function I can now implment the Lambda trigger in cognito so that when a user confirms their account, the Lambda function is trigger and that user's details are entered into my database.
+
+In AWS Cognito, I select my `cruddur-user-pool`, navigate to User pool properties and click on Add Lambda Trigger.
+
+The required configuration is as shown below:
+
+![Lambda Trigger](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/c4f99ab0-0e82-40d2-b9df-a57a9bc45357)
+
 
 
 
