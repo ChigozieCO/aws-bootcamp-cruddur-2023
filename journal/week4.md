@@ -652,7 +652,7 @@ The required configuration is as shown below:
 
 # Refactor the db library
 
-As we were using the db library `(db.py)` created earlier above we realiseed that caling the queries in the function would be easier if we put them in a class.
+As we were using the db library `(db.py)` created earlier above we realised that caling the queries in the function would be easier if we put them in a class and made reference to those we put in their seperate files .
 
 So this is what we did here, the refactored code looked as shown below:
 
@@ -661,56 +661,85 @@ from psycopg_pool import ConnectionPool
 import os
 import re
 import sys
+from flask import current_app as app
 
 class db:
   def __init__(self):
     self.init_pool()
 
-  def template(name):
+  def template(self,*args):
+    pathing = list((app.root_path,'db','sql','activities',) + args)
+    pathing[-1] = pathing[-1] + ".sql"
+
+    template_path = os.path.join(*pathing)
+
+    green = '\033[92m'
+    no_color = '\033[0m'
+    print("\n")
+    print(f'{green} Load SQL Template: {template_path} {no_color}')
+
+    with open(template_path, 'r') as f:
+      template_content = f.read()
+    return template_content
 
   def init_pool(self):
     connection_url = os.getenv("CONNECTION_URL")
     self.pool = ConnectionPool(connection_url)
   # We want to commit query such as an insert
-  def query_commit(self,sql,params):
-    # be sure to check for RETURNING in all uppercases
-    print("SQL STATEMENT [commit with returning id] -----------")
+  # be sure to check for RETURNING in all uppercases
+  def print_params(self,params):
+    blue = '\033[94m'
+    no_color = '\033[0m'
+    print(f'{blue} SQL Params:{no_color}')
+    for key, value in params.items():
+      print(key, ":", value)
+
+  def print_sql(self,title,sql):
+    cyan = '\033[96m'
+    no_color = '\033[0m'
+    print(f'{cyan} SQL STATEMENT-[{title}]------{no_color}')
+    print(sql)
+  def query_commit(self,sql,params={}):
+    self.print_sql('commit with returning',sql)
 
     pattern = r"\bRETURNING\b"
     is_returning_id = re.search(pattern, sql)
 
-    try:
-      conn = self.pool.connection()
-      cur = conn.cursor()
-      cur.execute(sql,params)
-      if is_returning_id:
-        returning_id = cur.fetchone()[0]
+      with self.pool.connection() as conn:
+        cur =  conn.cursor()
+        cur.execute(sql,params)
+        if is_returning_id:
+          returning_id = cur.fetchone()[0]
         conn.commit() 
-      if is_returning_id:
-        return returning_id
+        if is_returning_id:
+          return returning_id
     except Exception as err:
       self.print_sql_err(err)
       #conn.rollback()
   # when we want to return a json object
-  def query_array_json(self,sql):
-    print("SQL STATEMENT [array] -----------")
-    print(sql + "\n")
+  def query_array_json(self,sql,params={}):
+    self.print_sql('array',sql)
+
     wrapped_sql = self.query_wrap_array(sql)
     with self.pool.connection() as conn:
       with conn.cursor() as cur:
-        cur.execute(wrapped_sql)
+        cur.execute(wrapped_sql,params)
         json = cur.fetchone()
         return json[0]
   # when we want to return an array of json objects
-  def query_object_json(self,sql):
-    print("SQL STATEMENT [object] -----------")
-    print(sql + "\n")
+  def query_object_json(self,sql,params={}):
+
+    self.print_sql('json',sql)
+    self.print_params(params)
     wrapped_sql = self.query_wrap_object(sql)
     with self.pool.connection() as conn:
       with conn.cursor() as cur:
-        cur.execute(wrapped_sql)
+        cur.execute(wrapped_sql,params)
         json = cur.fetchone()
-        return json[0]
+        if json == None:
+          "{}"
+        else:
+          return json[0]
 
   def query_wrap_object(self,template):
     sql = f"""
@@ -746,7 +775,7 @@ class db:
 
 To improve the functionality of our app, to allow users send cruds (think instant short messaging, think tweets) which will populate the application, we need to improve our codebase.
 
-The first thing we did was create a `create_activity.sql` file. It's contents:
+The first thing we did was create a `create.sql` file. It's contents:
 
 ```py
 INSERT INTO (
@@ -765,30 +794,51 @@ VALUES (
 ) RETURNING uuid;
 ```
 
-Next I edited the code in the `home_activities.py` file:
+Next I created another sql file called `home.sql` that was placed in the `backend-flask/db/sql/activities/` directory. The contents are shown below:
+
+```sql
+SELECT
+  activities.uuid,
+  users.display_name,
+  users.handle,
+  activities.message,
+  activities.replies_count,
+  activities.reposts_count,
+  activities.likes_count,
+  activities.reply_to_activity_uuid,
+  activities.expires_at,
+  activities.created_at
+FROM public.activities
+LEFT JOIN public.users ON users.uuid = activities.user_uuid
+ORDER BY activities.created_at DESC
+```
+
+Now, instead of having this query directly in the home_activities code, I edited the code in the `home_activities.py` file to make reference to this file to run the query as shown:
 
 ```py
 ...
 from lib.db import db
 ...
 
-    results = db.query_array_json("""
-      SELECT
-        activities.uuid,
-        users.display_name,
-        users.handle,
-        activities.message,
-        activities.replies_count,
-        activities.reposts_count,
-        activities.likes_count,
-        activities.reply_to_activity_uuid,
-        activities.expires_at,
-        activities.created_at
-      FROM public.activities
-      LEFT JOIN public.users ON users.uuid = activities.user_uuid
-      ORDER BY activities.created_at DESC
-    """)
+    sql = db.template('activities','home')
+    results = db.query_array_json(sql)
     return results
+```
+
+Still in the `backend-flask/db/sql/activities/` directory, I created another sql file that was called `object.sql`. The code was shown below and the query was refenced in our `create_activity` code
+
+```sql
+SELECT
+  activities.uuid,
+  users.display_name,
+  users.handle,
+  activities.message,
+  activities.created_at,
+  activities.expires_at
+FROM public.activities
+INNER JOIN public.users ON users.uuid = activities.user_uuid 
+WHERE 
+  activities.uuid = %(uuid)s
 ```
 
 Next we edited the code in the `create_activity.py` file:
@@ -802,52 +852,103 @@ Next we edited the code in the `create_activity.py` file:
 
     else:
       expires_at = (now + ttl_offset)
-      CreateActivity.create_activity(user_handle,message,expires_at)
-      model['data'] = {
-...
-...
+      uuid = CreateActivity.create_activity(user_handle,message,expires_at)
 
+      object_json = CreateActivity.query_object_activity(uuid)
+      model['data'] = object_json
     return model
+
   def create_activity(handle, message, expires_at):
-    sql = f"""
-    INSERT INTO (
-      user_uuid,
-      message,
-      expires_at
-      )
-    VALUES (
-      (SELECT uuid 
-      from public.users 
-      WHERE users.handle = %(handle)s 
-      LIMIT 1
-      ),
-      %(message)s,
-      %(expires_at)s,
-      ) RETURNING uuid;
-    """
+    sql = db.template('activities','create')
     uuid = db.query_commit(sql,{
-      handle: handle,
-      message: message,
-      expires_at: expires_at
+      'handle': handle,
+      'message': message,
+      'expires_at': expires_at
+    })
+    return uuid
+
+  def query_object_activity(uuid):
+    sql = db.template('activities','object')
+    return db.query_object_json(sql,{
+      'uuid': uuid
     })
 ```
 
+# NotNullViolation error
 
+After all this was done and I ran my container again, I kept getting a NotNullViolation error.
 
+After days of troubleshooting and not coming up  with any working solution, I went to the discord channel and with guidance from those who had been able to solve the problem I was able to correct my code in the following ways.
 
+`app.py`
 
+In the `appy.py` codebase I removed the hard coded users, instead a request would be made and the response would then be saved in the variable.
 
+```py
+def data_activities():
+  user_handle  = request.json['user_handle']
+  message = request.json['message']
+  ttl = request.json['ttl']
+  model = CreateActivity.run(message, user_handle, ttl)
+```
 
+I then include 'email" in the `seed.sql` code because the `cruddur-post-configuration` lambda code kept looking for email as that was include in the values but it was present as it wasn't part of the seeded data.
 
+```sql
+INSERT INTO public.users (display_name, handle, email, cognito_user_id)
+VALUES
+  ('Andrew Brown', 'andrewbrown' , 'andrew@test.com', 'MOCK'),
+  ('Andrew Bayko', 'bayko' , 'bayko@friedfish.com', 'MOCK');
+```
 
+I also made some changes to my `db.py` file
 
+```py
+class Db:
+  def __init__(self):
+    self.init_pool()
 
+  def template(self,*args):
+    pathing = list((app.root_path,'db','sql',) + args)
+    pathing[-1] = pathing[-1] + ".sql"
 
+    template_path = os.path.join(*pathing)
 
+...
+...
 
+    print ("pgcode:", err.pgcode, "\n")
 
+db = Db()
+```
 
+I needed to forward the "user_handle" to the `ActivityForm` so I updated my `HomeFeedPage.js` file like so:
 
+```js
+      <DesktopNavigation user={user} active={'home'} setPopped={setPopped} />
+      <div className='content'>
+        <ActivityForm  
+          user_handle={user}
+          popped={popped}
+          setPopped={setPopped} 
+          setActivities={setActivities}
+```
 
+In the `ActivityForm.js` file I include "user_handle" in the post request message:
 
+```js
+
+...
+...
+
+        body: JSON.stringify({
+          user_handle: props.user_handle.handle,
+          message: message,
+          ttl: ttl
+        }),
+
+...
+...
+
+With all these in place I was able to get rid of the NotNullViolation error and my cruddur app ran seamlessly.
 
