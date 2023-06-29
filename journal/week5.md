@@ -289,6 +289,72 @@ for item in items:
     print(item)
 ```
 
+# Refactor the `db.py` Code
+
+Since we introduced the use of params, we need to refactor the `db.py` code to reflect this change. I did this by makinf the following changes
+
+```py
+
+...
+
+    for key, value in params.items():
+      print(key, ":", value)
+
+  def print_sql(self,title,sql,params={}):
+    cyan = '\033[96m'
+    no_color = '\033[0m'
+    print(f'{cyan} SQL STATEMENT-[{title}]------{no_color}')
+    print(sql,params)
+  def query_commit(self,sql,params={}):
+    self.print_sql('commit with returning',sql,params)
+
+    pattern = r"\bRETURNING\b"
+    is_returning_id = re.search(pattern, sql)
+
+...
+...
+
+  def query_array_json(self,sql,params={}):
+    self.print_sql('array',sql,params)
+
+    wrapped_sql = self.query_wrap_array(sql)
+
+...
+...
+
+  def query_object_json(self,sql,params={}):
+
+    self.print_sql('json',sql,params)
+    self.print_params(params)
+    wrapped_sql = self.query_wrap_object(sql)
+
+...
+...
+
+  def query_value(self,sql,params={}):
+    self.print_sql('value',sql,params)
+    with self.pool.connection() as conn:
+      with conn.cursor() as cur:
+        cur.execute(sql,params)
+        json = cur.fetchone()
+        return json[0]
+```
+
+# Update `backend-flask/bin/db/drop` Script
+
+While running the db/drop script we discovered that it was failing when there was no database to drop and so there was a need to add a code that would stop it from failing when no database exists. The code looked like this afterwards:
+
+```sh
+#!/usr/bin/bash
+CYAN='\033[1;36m'
+NO_COLOR='\033[0m'
+LABEL="db-drop"
+printf "${CYAN}== ${LABEL}${NO_COLOR}\n"
+
+NO_DB_CONNECTION_URL=$(sed 's/\/cruddur//g' <<<"$CONNECTION_URL")
+psql $NO_DB_CONNECTION_URL -c "DROP DATABASE IF EXISTS cruddur;"
+```
+
 
 
 
