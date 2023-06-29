@@ -252,6 +252,7 @@ print(f"my-uuid: {my_user_uuid}")
 query_params = {
   'TableName': table_name,
   'KeyConditionExpression': 'pk = :pk',
+  'ScanIndexForward': False,
   'ExpressionAttributeValues': {
     ':pk': {'S': f"GRP#{my_user_uuid}"}
   },
@@ -354,6 +355,131 @@ printf "${CYAN}== ${LABEL}${NO_COLOR}\n"
 NO_DB_CONNECTION_URL=$(sed 's/\/cruddur//g' <<<"$CONNECTION_URL")
 psql $NO_DB_CONNECTION_URL -c "DROP DATABASE IF EXISTS cruddur;"
 ```
+
+# Update `data_message_groups()` Function in `app.py` Code
+
+Now we are configuring the app to allow users send and receive messages so the first thing to do is to edit the `message_groups` function:
+
+```py
+def data_message_groups():
+  access_token = extract_access_token(request.headers)
+  try:
+    claims = cognito_jwt_token.verify(access_token)
+  # Authenticated request
+    app.logger.debug('authenticated')
+    app.logger.debug(claims)
+    cognito_user_id = claims['sub']
+    models = MessageGroups.run(cognito_user_id=cognito_user_id)
+    if model['errors'] is not None:
+      return model['errors'], 422
+    else:
+      return model['data'], 200
+  except TokenVerifyError as e:
+    #Unauthenticated request
+    app.logger.debug(e)
+    return {}, 401
+```
+
+# Cognito Scripts
+
+To automate cognito processes we need to create scripts for cognito
+
+### Script to List Cognito Users
+
+```py
+#!/usr/bin/env python3
+
+import boto3
+import os
+import json
+
+userpool_id = os.getenv("AWS_COGNITO_USER_POOL_ID")
+client = boto3.client('cognito-idp')
+params = {
+  'UserPoolId': userpool_id,
+  'AttributesToGet': [
+      'preferred_username',
+      'sub'
+  ]
+}
+response = client.list_users(**params)
+users = response['Users']
+
+print(json.dumps(users, sort_keys=True, indent=2, default=str))
+
+dict_users = {}
+for user in users:
+  attrs = user['Attributes']
+  sub    = next((a for a in attrs if a["Name"] == 'sub'), None)
+  handle = next((a for a in attrs if a["Name"] == 'preferred_username'), None)
+  dict_users[handle['Value']] = sub['Value']
+
+print(json.dumps(dict_users, sort_keys=True, indent=2, default=str))
+```
+
+### Script to Update Cognito User IDs
+
+```py
+#!/usr/bin/env python3
+
+import boto3
+import os
+import sys
+
+print("---- db-update-cognito-user-ids ----")
+
+current_path = os.path.dirname(os.path.abspath(__file__))
+parent_path = os.path.abspath(os.path.join(current_path, '..', '..'))
+sys.path.append(parent_path)
+from lib.db import db
+
+def update_users_with_cognito_user_id(handle,sub):
+  sql = """
+    UPDATE public.users
+    SET cognito_user_id = %(sub)s
+    WHERE
+      users.handle = %(handle)s;
+  """
+  db.query_commit(sql,{
+    'handle' : handle,
+    'sub' : sub
+  })
+
+def get_cognito_user_ids():
+  userpool_id = os.getenv("AWS_COGNITO_USER_POOL_ID")
+  client = boto3.client('cognito-idp')
+  params = {
+    'UserPoolId': userpool_id,
+    'AttributesToGet': [
+        'preferred_username',
+        'sub'
+    ]
+  }
+  response = client.list_users(**params)
+  users = response['Users']
+  dict_users = {}
+  for user in users:
+    attrs = user['Attributes']
+    sub    = next((a for a in attrs if a["Name"] == 'sub'), None)
+    handle = next((a for a in attrs if a["Name"] == 'preferred_username'), None)
+    dict_users[handle['Value']] = sub['Value']
+  return dict_users
+
+
+users = get_cognito_user_ids()
+
+for handle, sub in users.items():
+  print('----',handle,sub)
+  update_users_with_cognito_user_id(
+    handle=handle,
+    sub=sub
+  )
+```
+
+
+
+
+
 
 
 
