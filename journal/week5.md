@@ -369,7 +369,7 @@ def data_message_groups():
     app.logger.debug('authenticated')
     app.logger.debug(claims)
     cognito_user_id = claims['sub']
-    models = MessageGroups.run(cognito_user_id=cognito_user_id)
+    model = MessageGroups.run(cognito_user_id=cognito_user_id)
     if model['errors'] is not None:
       return model['errors'], 422
     else:
@@ -489,12 +489,13 @@ WHERE
 LIMIT 1
 ```
 
-# Dynamobd Library
+# Dynamodb Library
 
 I then create the dynamodb library file which was named `ddb.py`
 
 ```py
 import boto3
+import botocore.exceptions
 import sys
 from datetime import datetime, timedelta, timezone
 import uuid
@@ -514,21 +515,21 @@ class Ddb:
     table_name = 'cruddur-messages'
     query_params = {
       'TableName': table_name,
-      'KeyConditionExpression': 'pk = :pk',
+      'KeyConditionExpression': 'pk = :pk' AND begins_with(sk,:year)',
       'ScanIndexForward': False,
       'Limit': 20,
       'ExpressionAttributeValues': {
+        ':year': {'S': year },
         ':pk': {'S': f"GRP#{my_user_uuid}"}
       }
     }
-    print('query-params')
+    print('query-params:',query_params)
     print(query_params)
-    print('client')
-    print(client)
 
     # query the table
     response = client.query(**query_params)
     items = response['Items']
+    print("items::", items)
 
     results = []
     for item in items:
@@ -541,6 +542,127 @@ class Ddb:
         'created_at': last_sent_at
       })
     return results
+
+  def list_messages(client,message_group_uuid):
+    year = str(datetime.now().year)
+    table_name = 'cruddur-messages'
+    query_params = {
+      'TableName': table_name,
+      'KeyConditionExpression': 'pk = :pk AND begins_with(sk,:year)',
+      'ScanIndexForward': False,
+      'Limit': 20,
+      'ExpressionAttributeValues': {
+        ':year': {'S': year },
+        ':pk': {'S': f"MSG#{message_group_uuid}"}
+      }
+    }
+
+    response = client.query(**query_params)
+    items = response['Items']
+
+    items.reverse()
+    results = []
+    for item in items:
+      created_at = item['sk']['S']
+      results.append({
+        'uuid': item['message_uuid']['S'],
+        'display_name': item['user_display_name']['S'],
+        'handle': item['user_handle']['S'],
+        'message': item['message']['S'],
+        'created_at': created_at
+      })
+    return results
+  def create_message(client,message_group_uuid, message, my_user_uuid, my_user_display_name, my_user_handle):
+    now = datetime.now(timezone.utc).astimezone().isoformat()
+    created_at = now
+    message_uuid = str(uuid.uuid4())
+
+    record = {
+      'pk':   {'S': f"MSG#{message_group_uuid}"},
+      'sk':   {'S': created_at },
+      'message': {'S': message},
+      'message_uuid': {'S': message_uuid},
+      'user_uuid': {'S': my_user_uuid},
+      'user_display_name': {'S': my_user_display_name},
+      'user_handle': {'S': my_user_handle}
+    }
+    # insert the record into the table
+    table_name = 'cruddur-messages'
+    response = client.put_item(
+      TableName=table_name,
+      Item=record
+    )
+    # print the response
+    print(response)
+    return {
+      'message_group_uuid': message_group_uuid,
+      'uuid': my_user_uuid,
+      'display_name': my_user_display_name,
+      'handle':  my_user_handle,
+      'message': message,
+      'created_at': created_at
+    }
+  def create_message_group(client, message,my_user_uuid, my_user_display_name, my_user_handle, other_user_uuid, other_user_display_name, other_user_handle):
+    print('== create_message_group.1')
+    table_name = 'cruddur-messages'
+
+    message_group_uuid = str(uuid.uuid4())
+    message_uuid = str(uuid.uuid4())
+    now = datetime.now(timezone.utc).astimezone().isoformat()
+    last_message_at = now
+    created_at = now
+    print('== create_message_group.2')
+
+    my_message_group = {
+      'pk': {'S': f"GRP#{my_user_uuid}"},
+      'sk': {'S': last_message_at},
+      'message_group_uuid': {'S': message_group_uuid},
+      'message': {'S': message},
+      'user_uuid': {'S': other_user_uuid},
+      'user_display_name': {'S': other_user_display_name},
+      'user_handle':  {'S': other_user_handle}
+    }
+
+    print('== create_message_group.3')
+    other_message_group = {
+      'pk': {'S': f"GRP#{other_user_uuid}"},
+      'sk': {'S': last_message_at},
+      'message_group_uuid': {'S': message_group_uuid},
+      'message': {'S': message},
+      'user_uuid': {'S': my_user_uuid},
+      'user_display_name': {'S': my_user_display_name},
+      'user_handle':  {'S': my_user_handle}
+    }
+
+    print('== create_message_group.4')
+    message = {
+      'pk':   {'S': f"MSG#{message_group_uuid}"},
+      'sk':   {'S': created_at },
+      'message': {'S': message},
+      'message_uuid': {'S': message_uuid},
+      'user_uuid': {'S': my_user_uuid},
+      'user_display_name': {'S': my_user_display_name},
+      'user_handle': {'S': my_user_handle}
+    }
+
+    items = {
+      table_name: [
+        {'PutRequest': {'Item': my_message_group}},
+        {'PutRequest': {'Item': other_message_group}},
+        {'PutRequest': {'Item': message}}
+      ]
+    }
+
+    try:
+      print('== create_message_group.try')
+      # Begin the transaction
+      response = client.batch_write_item(RequestItems=items)
+      return {
+        'message_group_uuid': message_group_uuid
+      }
+    except botocore.exceptions.ClientError as e:
+      print('== create_message_group.error')
+      print(e)
 ```
 
 # Refactor the message group
@@ -620,9 +742,421 @@ import checkAuth from '../lib/CheckAuth';
 ...
 ```
 
+# Update Pages to Match on Uuid
 
+The way our code was previously written, the pages and messages match to user handles so now that our uuid was set we need to change it to match on uuid instead.
 
+We did this by removing the `user_sender_handle` and `user_receiver_handle` and replacing it with `message_group_uuid` and `cognito_user_id` after we had created the `message_group_uuid` function in our `app.py` code.
 
+```py
+
+...
+
+@app.route("/api/messages/<string:message_group_uuid>", methods=['GET'])
+def data_messages(message_group_uuid):
+  access_token = extract_access_token(request.headers)
+  try:
+    claims = cognito_jwt_token.verify(access_token)
+  # Authenticated request
+    app.logger.debug('authenticated')
+    app.logger.debug(claims)
+    cognito_user_id = claims['sub']
+    model = Messages.run(
+      cognito_user_id=cognito_user_id,
+      message_group_uuid=message_group_uuid
+    )    
+    if model['errors'] is not None:
+      return model['errors'], 422
+    else:
+      return model['data'], 200
+  except TokenVerifyError as e:
+    #Unauthenticated request
+    app.logger.debug(e)
+    return {}, 401
+
+...
+```
+
+# Implement New Conversation and New Message Group Into Application
+
+So far we configured the messages between two users who were sending message and response back and forth between easch other and so now we set up the app to recieve new conversation from a third user.
+
+To do this I created a new page `MessageGroupNewPage.js` and a new component `MessageGroupNewItem.js`
+
+### `MessageGroupNewPage.js`
+
+```js
+import './MessageGroupItem.css';
+import { Link } from "react-router-dom";
+
+export default function MessageGroupNewItem(props) {
+  return (
+
+    <Link className='message_group_item active' to={`/messages/new/`+props.user.handle}>
+      <div className='message_group_avatar'></div>
+      <div className='message_content'>
+        <div classsName='message_group_meta'>
+          <div className='message_group_identity'>
+            <div className='display_name'>{props.user.display_name}</div>
+            <div className="handle">@{props.user.handle}</div>
+          </div>{/* activity_identity */}
+        </div>{/* message_meta */}
+      </div>{/* message_content */}
+    </Link>
+  );
+}
+```
+
+### `MessageGroupNewItem.js`
+
+```js
+import './MessageGroupPage.css';
+import React from "react";
+import { useParams } from 'react-router-dom';
+
+import DesktopNavigation  from '../components/DesktopNavigation';
+import MessageGroupFeed from '../components/MessageGroupFeed';
+import MessagesFeed from '../components/MessageFeed';
+import MessagesForm from '../components/MessageForm';
+import checkAuth from '../lib/CheckAuth';
+
+export default function MessageGroupPage() {
+  const [otherUser, setOtherUser] = React.useState([]);
+  const [messageGroups, setMessageGroups] = React.useState([]);
+  const [messages, setMessages] = React.useState([]);
+  const [popped, setPopped] = React.useState([]);
+  const [user, setUser] = React.useState(null);
+  const dataFetchedRef = React.useRef(false);
+  const params = useParams();
+
+  const loadUserShortData = async () => {
+    try {
+      const backend_url = `${process.env.REACT_APP_BACKEND_URL}/api/users/@${params.handle}/short`
+      const res = await fetch(backend_url, {
+        method: "GET"
+      });
+      let resJson = await res.json();
+      if (res.status === 200) {
+        console.log('other user:',resJson)
+        setOtherUser(resJson)
+      } else {
+        console.log(res)
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };  
+
+  const loadMessageGroupsData = async () => {
+    try {
+      const backend_url = `${process.env.REACT_APP_BACKEND_URL}/api/message_groups`
+      const res = await fetch(backend_url, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`
+        },
+        method: "GET"
+      });
+      let resJson = await res.json();
+      if (res.status === 200) {
+        setMessageGroups(resJson)
+      } else {
+        console.log(res)
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };  
+
+  React.useEffect(()=>{
+    //prevents double call
+    if (dataFetchedRef.current) return;
+    dataFetchedRef.current = true;
+
+    loadMessageGroupsData();
+    loadUserShortData();
+    checkAuth(setUser);
+  }, [])
+  return (
+    <article>
+      <DesktopNavigation user={user} active={'home'} setPopped={setPopped} />
+      <section className='message_groups'>
+        <MessageGroupFeed otherUser={otherUser} message_groups={messageGroups} />
+      </section>
+      <div className='content messages'>
+        <MessagesFeed messages={messages} />
+        <MessagesForm setMessages={setMessages} />
+      </div>
+    </article>
+  );
+}
+```
+
+### Update `app.py`
+
+We updated the `app.py` code to include the cognito jwt token as shown below:
+
+```py
+
+...
+  access_token = extract_access_token(request.headers)
+  try:
+    claims = cognito_jwt_token.verify(access_token)
+  # Authenticated request
+    app.logger.debug('authenticated')
+    app.logger.debug(claims)
+    cognito_user_id = claims['sub']
+    if message_group_uuid == None:
+      # Create for the first time
+      model = CreateMessage.run(
+        mode="create",
+        message=message,
+        cognito_user_id=cognito_user_id,
+        user_receiver_handle=user_receiver_handle
+      )
+    else:
+      # Push onto existing Message Group
+      model = CreateMessage.run(
+        mode="update",
+        message=message,
+        message_group_uuid=message_group_uuid,
+        cognito_user_id=cognito_user_id
+      )
+    if model['errors'] is not None:
+      return model['errors'], 422
+    else:
+      return model['data'], 200
+  except TokenVerifyError as e:
+    #Unauthenticated request
+    app.logger.debug(e)
+    return {}, 401
+
+...
+
+@app.route("/api/users/@<string:handle>/short", methods=['GET'])
+def data_users_short(handle):
+  data = UsersShort.run(handle)
+  return data, 200
+
+...
+```
+
+### SQL Files
+
+We created some more sql files , they include:
+
+### `create_message_users.sql`
+
+```sql
+SELECT 
+  users.uuid,
+  users.display_name,
+  users.handle,
+  CASE users.cognito_user_id = %(cognito_user_id)s
+  WHEN TRUE THEN
+    'sender'
+  WHEN FALSE THEN
+    'recv'
+  ELSE
+    'other'
+  END as kind
+FROM public.users
+WHERE
+  users.cognito_user_id = %(cognito_user_id)s
+  OR 
+  users.handle = %(user_receiver_handle)s
+```
+
+### `short.sql`
+
+```sql
+SELECT
+  users.uuid,
+  users.handle,
+  users.display_name
+FROM public.users
+WHERE 
+  users.handle = %(handle)s
+```
+
+# Implement Dynamodb Streams
+
+First I updated the `ddb/schema-load` script to include a Global Secondary Index(GSI). Below is the code that was included:
+
+```sh
+
+...
+
+  AttributeDefinitions=[
+    {
+      'AttributeName': 'message_group_uuid',
+      'AttributeType': 'S'
+    },
+
+...
+...
+
+  GlobalSecondaryIndexes= [{
+    'IndexName':'message-group-sk-index',
+    'KeySchema':[{
+      'AttributeName': 'message_group_uuid',
+      'KeyType': 'HASH'
+    },{
+      'AttributeName': 'sk',
+      'KeyType': 'RANGE'
+    }],
+    'Projection': {
+      'ProjectionType': 'ALL'
+    },
+    'ProvisionedThroughput': {
+      'ReadCapacityUnits': 5,
+      'WriteCapacityUnits': 5
+    },
+  }],
+...
+```
+
+### Create Dynamodb Table
+
+Next I created a dynamodb table by running the below command:
+
+```sh
+./bin/ddb/schema-load prod
+```
+
+![ddb cli](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/3cba2b30-684b-4789-8ae2-0ea0c3732143)
+
+![ddb Console](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/87c5c863-c91b-4f81-b581-eb4552221aed)
+
+### Turn on Dynamodb Stream
+
+Once the table was created I clicked into it and went to the `Export and streams` tab.
+
+Scroll down to DynamoDB stream details and turn it on.
+
+Select "New Image"
+
+![ddb stream](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/1a35dc8e-5e0f-40e6-99bb-46cee70892e2)
+
+### Create VPC endpoint
+
+- Navigate to VPC console
+- Click on Endpoints tab from the options on the left hand side
+- Click Create Endpoint
+- Name the endpoint (I named it ddb-cruddur)
+- Leave AWS Services selected
+- Select DynamoDB from Services
+- Select Default VPC
+- Choose the available Route tables
+- Select Full Access
+- Then Create
+
+![vpc endpoint](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/eb26c773-2be0-43e7-9cfc-ef4d4cd3d3ff)
+
+### Cruddur Messaging Stream Lambda
+
+Now I created a lambda function with the code below:
+
+```py
+import json
+import boto3
+from boto3.dynamodb.conditions import Key, Attr
+
+dynamodb = boto3.resource(
+ 'dynamodb',
+ region_name='us-east-1',
+ endpoint_url="http://dynamodb.us-east-1.amazonaws.com"
+)
+
+def lambda_handler(event, context):
+  print('event-data',event)
+
+  eventName = event['Records'][0]['eventName']
+  if (eventName == 'REMOVE'):
+    print("skip REMOVE event")
+    return
+  pk = event['Records'][0]['dynamodb']['Keys']['pk']['S']
+  sk = event['Records'][0]['dynamodb']['Keys']['sk']['S']
+  if pk.startswith('MSG#'):
+    group_uuid = pk.replace("MSG#","")
+    message = event['Records'][0]['dynamodb']['NewImage']['message']['S']
+    print("GRUP ===>",group_uuid,message)
+
+    table_name = 'cruddur-messages'
+    index_name = 'message-group-sk-index'
+    table = dynamodb.Table(table_name)
+    data = table.query(
+      IndexName=index_name,
+      KeyConditionExpression=Key('message_group_uuid').eq(group_uuid)
+    )
+    print("RESP ===>",data['Items'])
+
+    # recreate the message group rows with new SK value
+    for i in data['Items']:
+      delete_item = table.delete_item(Key={'pk': i['pk'], 'sk': i['sk']})
+      print("DELETE ===>",delete_item)
+
+      response = table.put_item(
+        Item={
+          'pk': i['pk'],
+          'sk': sk,
+          'message_group_uuid':i['message_group_uuid'],
+          'message':message,
+          'user_display_name': i['user_display_name'],
+          'user_handle': i['user_handle'],
+          'user_uuid': i['user_uuid']
+        }
+      )
+      print("CREATE ===>",response)
+```
+
+### Update Permissions
+
+- Navigate to the Configurations tab, select Permissions and then click on the Execution role name.
+
+- When the role opens up we will edit the role and add more permissions.
+
+- Click 'Add Permission' and select 'Attach Policy' and select the `AWSLambdaInvocation-DynamoDB` policy.
+
+- After adding the above policy, click 'Add Permission' and select 'Create Inline Policy`
+
+- Click on the "JSON" tab
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": [
+                "dynamodb:PutItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:Query"
+            ],
+            "Resource": [
+                "arn:aws:dynamodb:<region>:<account_id>:table/cruddur-messages/index/message-group-sk-index",
+                "arn:aws:dynamodb:<region>:<account_id>:table/cruddur-messages"
+            ]
+        }
+    ]
+}
+```
+
+### Implement Trigger
+
+Back at Dynamodb console, I clicked into it my table and went to the `Export and streams` tab.
+
+Scroll down to 'Trigger'
+
+Select 'Create Trigger'
+
+Enter the settings as shown below:
+
+![Trigger](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/27922a03-4f3e-4137-be19-806536e28b1d)
+
+![Lambda](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/d8f5488c-e453-453c-b8c3-d666e68cd65f)
+
+Now we go back and restart our container and test our messaging.
 
 
 
