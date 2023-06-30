@@ -476,7 +476,149 @@ for handle, sub in users.items():
   )
 ```
 
+# SQL File
 
+The next thing I did was to create a sql file with sql commands to extract the uuid from cognito user id.
+
+```sql
+SELECT
+  users.uuid
+FROM public.users
+WHERE 
+  users.cognito_user_id = %(cognito_user_id)s
+LIMIT 1
+```
+
+# Dynamobd Library
+
+I then create the dynamodb library file which was named `ddb.py`
+
+```py
+import boto3
+import sys
+from datetime import datetime, timedelta, timezone
+import uuid
+import os
+
+class Ddb:
+  def client():
+    endpoint_url = os.getenv("AWS_ENDPOINT_URL")
+    if endpoint_url:
+      attrs = { 'endpoint_url': endpoint_url }
+    else:
+      attrs = {}
+    dynamodb = boto3.client('dynamodb',**attrs)
+    return dynamodb
+
+  def list_message_groups(client,my_user_uuid):
+    table_name = 'cruddur-messages'
+    query_params = {
+      'TableName': table_name,
+      'KeyConditionExpression': 'pk = :pk',
+      'ScanIndexForward': False,
+      'Limit': 20,
+      'ExpressionAttributeValues': {
+        ':pk': {'S': f"GRP#{my_user_uuid}"}
+      }
+    }
+    print('query-params')
+    print(query_params)
+    print('client')
+    print(client)
+
+    # query the table
+    response = client.query(**query_params)
+    items = response['Items']
+
+    results = []
+    for item in items:
+      last_sent_at = item['sk']['S']
+      results.append({
+        'uuid': item['message_group_uuid']['S'],
+        'display_name': item['user_display_name']['S'],
+        'handle': item['user_handle']['S'],
+        'message': item['message']['S'],
+        'created_at': last_sent_at
+      })
+    return results
+```
+
+# Refactor the message group
+
+At this point I had to refactor the `message_group.py` file to work with dynamodb lib.
+
+```
+
+from datetime import datetime, timedelta, timezone
+
+from lib.ddb import Ddb
+from lib.db import db
+
+...
+
+    sql = db.template('users','uuid_from_cognito_user_id')
+    my_user_uuid = db.query_value(sql,{
+      'cognito_user_id': cognito_user_id})
+
+    print(f"UUID: {my_user_uuid}")
+
+    ddb = Ddb.client()
+    data = Ddb.list_message_groups(ddb, my_user_uuid)
+    print("list_message_groups:",data)
+
+    model['data'] = data
+    return model
+```
+
+# Implement Access (Bearer) Token in Message groups.
+
+To implement the access tokens in the message groups I went back to my `MessageGroupPage.js`, `HomeFeedPage.js`, `MessageGroupsPage.js`, and I took out the hard coded cookie shown below:
+
+```py
+// [TODO] Authenication
+import Cookies from 'js-cookie'
+
+```
+
+and included the authorization token in those codes:
+
+```py
+
+...
+      const res = await fetch(backend_url, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`
+        },
+...
+```
+
+# Update Setup Script
+
+Due to the creation of more necessary scripts required in our setup, I need to add that script to be part of the setup process and so I will modify the setup script tp look as shown below:
+
+```sh
+bin_path="$(realpath .)/bin"
+
+source "$bin_path/db/drop"
+source "$bin_path/db/create"
+source "$bin_path/db/schema-load"
+source "$bin_path/db/seed"
+python "$bin_path/db/update-cognito-user-ids"
+```
+
+# Extract CheckAuth to it's own File
+
+I extracted the `CheckAuth` function from  the `MessageGroupPage.js`, `MessageGroupsPage.js` and  `HomeFeedPage.js` files.
+
+I then put the `CheckAuth` function in a file of it's own. Then import this file into the code of those files where it was removed from. This was done to simplify our code and make it cleaner.
+
+This would reduce the repetitive lines of code in each of these files.
+
+```js
+...
+import checkAuth from '../lib/CheckAuth';
+...
+```
 
 
 
