@@ -188,11 +188,71 @@ docker push $ECR_BACKEND_FLASK_URL:latest
 
 ![Pushimg2](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/0d815015-d61b-419d-9d74-ab05a1f2000f)
 
-### Task Definition
+# Set Parameter store
 
-To run our containers we either start a task or a service. The main difference between a task and a service is that a task ends once it completes it's Creating Task and Execution Roles for Task Defintion
+We will save our secrets using the parameter store. We are opting to use the parameter store instead of the secrets manager because it is free whereas secret manager isn't.
 
-Created a of the policy definition, this file is then passed with the create command below in the cli
+We are setting the parameters as secureStrings so that it is encrypted server side.
+
+We'll do this via the cli as usual. using the below code, we set the following parameters
+
+```
+aws ssm put-parameter --type "SecureString" --name "/cruddur/backend-flask/AWS_ACCESS_KEY_ID" --value $AWS_ACCESS_KEY_ID
+aws ssm put-parameter --type "SecureString" --name "/cruddur/backend-flask/AWS_SECRET_ACCESS_KEY" --value $AWS_SECRET_ACCESS_KEY
+aws ssm put-parameter --type "SecureString" --name "/cruddur/backend-flask/CONNECTION_URL" --value $PROD_CONNECTION_URL
+aws ssm put-parameter --type "SecureString" --name "/cruddur/backend-flask/ROLLBAR_ACCESS_TOKEN" --value $ROLLBAR_ACCESS_TOKEN
+aws ssm put-parameter --type "SecureString" --name "/cruddur/backend-flask/OTEL_EXPORTER_OTLP_HEADERS" --value "x-honeycomb-team=$HONEYCOMB_API_KEY"
+```
+
+![parastore](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/10e202a9-0d63-4222-b1fc-c3b2f3538eca)
+
+![ParaStore2](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/8ffa9679-0d1b-4826-9860-226d2b2e0b62)
+
+# Task Definition & Execution Role
+
+To run our containers we either start a task or a service. The main difference between a task and a service is that a task kills itself once it executes and finishes whereas a service keeps continuously running. A service is a task that continuously runs.
+
+A task is better suited for batch jobs and the likes and a service is suited for web apps which is what we are running and this is why we would create services when we need to.
+
+In other create a service though, we need to have a task definition because it would be used to create the service. So this is what we do here. We will be creating task and execution roles for our task defintion.
+
+Our Task definition file is basically like our docker compose file, it says how we provision our services.
+
+I created a file of the policy definition.
+
+### `aws/policies/service-assume-role-execution-policy.json`
+
+```json
+{
+  "Version":"2012-10-17",
+  "Statement":[{
+    "Action":["sts:AssumeRole"],
+    "Effect":"Allow",
+    "Principal":{
+      "Service":["ecs-tasks.amazonaws.com"]
+    }
+  }]
+}
+```
+
+### `aws/policies/service-execution-policy.json`
+
+```json
+{
+    "Version":"2012-10-17",
+    "Statement":[{
+      "Effect": "Allow",
+      "Action": [
+        "ssm:GetParameters",
+        "ssm:GetParameter"
+      ],
+      "Resource": "arn:aws:ssm:us-east-1:<aws account id>:parameter/cruddur/backend-flask/*"
+    }]
+  }
+```
+
+
+This file is then passed with the create command below in the cli
 
 ```
 aws iam create-role \
@@ -202,9 +262,7 @@ aws iam create-role \
 
 (screenshot ServiceExecRole.png)
 
-Set Parameter store
 
-(screenshot parastore)
 
 Created service through the cli 
 Had to delete it as a result of the inability to shell into into as it didn't have the execute command enabled and that can only be set through the cli
