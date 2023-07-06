@@ -218,7 +218,7 @@ In other create a service though, we need to have a task definition because it w
 
 Our Task definition file is basically like our docker compose file, it says how we provision our services.
 
-I created a file of the policy definition.
+I created different files of the policy definition and execution roles
 
 ### `aws/policies/service-assume-role-execution-policy.json`
 
@@ -254,10 +254,17 @@ I created a file of the policy definition.
 
 This file is then passed with the create command below in the cli
 
-```
+```sh
 aws iam create-role \
     --role-name CruddurServiceExecutionRole \
-    --assume-role-policy-document file://aws/policies/service-execution-policy.json 
+    --assume-role-policy-document file://aws/policies/service-assume-role-execution-policy.json
+```
+
+```sh
+aws iam put-role-policy \
+    --policy-name CruddurServiceExecutionPolicy \
+    --role-name CruddurServiceExecutionRole  \
+    --policy-document file://aws/policies/service-execution-policy.json 
 ```
 
 (screenshot ServiceExecRole.png)
