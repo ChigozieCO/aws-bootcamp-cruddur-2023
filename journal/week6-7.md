@@ -208,7 +208,7 @@ aws ssm put-parameter --type "SecureString" --name "/cruddur/backend-flask/OTEL_
 
 ![ParaStore2](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/8ffa9679-0d1b-4826-9860-226d2b2e0b62)
 
-# Task Definition & Execution Role
+# Execution Roles & Task Definition 
 
 To run our containers we either start a task or a service. The main difference between a task and a service is that a task kills itself once it executes and finishes whereas a service keeps continuously running. A service is a task that continuously runs.
 
@@ -217,6 +217,8 @@ A task is better suited for batch jobs and the likes and a service is suited for
 In other create a service though, we need to have a task definition because it would be used to create the service. So this is what we do here. We will be creating task and execution roles for our task defintion.
 
 Our Task definition file is basically like our docker compose file, it says how we provision our services.
+
+### `CruddurServiceExecutionRole`
 
 I created different files of the policy definition and execution roles
 
@@ -251,7 +253,6 @@ I created different files of the policy definition and execution roles
   }
 ```
 
-
 This file is then passed with the create command below in the cli
 
 ```sh
@@ -267,25 +268,192 @@ aws iam put-role-policy \
     --policy-document file://aws/policies/service-execution-policy.json 
 ```
 
-(screenshot ServiceExecRole.png)
+![ServiceExecRole](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/5bea3a3f-b058-4646-9173-6b3fedaee061)
 
+### `CruddurTaskRole`
 
+Next I created the task role via the cli using the command below
 
-Created service through the cli 
-Had to delete it as a result of the inability to shell into into as it didn't have the execute command enabled and that can only be set through the cli
+```sh
+aws iam create-role \
+    --role-name CruddurTaskRole \
+    --assume-role-policy-document "{
+  \"Version\":\"2012-10-17\",
+  \"Statement\":[{
+    \"Action\":[\"sts:AssumeRole\"],
+    \"Effect\":\"Allow\",
+    \"Principal\":{
+      \"Service\":[\"ecs-tasks.amazonaws.com\"]
+    }
+  }]
+}"
+```
 
-(screenshot)
+Attach a policy 
 
-Create service through the cli
+```sh
+aws iam put-role-policy \
+  --policy-name SSMAccessPolicy \
+  --role-name CruddurTaskRole \
+  --policy-document "{
+  \"Version\":\"2012-10-17\",
+  \"Statement\":[{
+    \"Action\":[
+      \"ssmmessages:CreateControlChannel\",
+      \"ssmmessages:CreateDataChannel\",
+      \"ssmmessages:OpenControlChannel\",
+      \"ssmmessages:OpenDataChannel\"
+    ],
+    \"Effect\":\"Allow\",
+    \"Resource\":\"*\"
+  }]
+}
+"
+```
+
+```sh
+aws iam attach-role-policy --policy-arn arn:aws:iam::aws:policy/CloudWatchFullAccess --role-name CruddurTaskRole
+aws iam attach-role-policy --policy-arn arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess --role-name CruddurTaskRole
+```
+
+### Task Definition
+
+Now it was time to create the task definiton for the backend container.
+
+First I saved the definition policy in my file name `backend-flask.json` in the `aws/task-definitions/` directory
+
+```json
+{
+    "family": "backend-flask",
+    "executionRoleArn": "arn:aws:iam::<redacted>:role/CruddurServiceExecutionRole",
+    "taskRoleArn": "arn:aws:iam::<redacted>:role/CruddurTaskRole",
+    "networkMode": "awsvpc",
+    "cpu": "256",
+    "memory": "512",
+    "requiresCompatibilities": [ 
+      "FARGATE" 
+    ],
+    "containerDefinitions": [
+      {
+        "name": "backend-flask",
+        "image": "<redacted>.dkr.ecr.<region>.amazonaws.com/backend-flask",
+        "essential": true,
+        "healthCheck": {
+          "command": [
+            "CMD-SHELL",
+            "python /backend-flask/bin/flask/health-check"
+          ],
+          "interval": 30,
+          "timeout": 5,
+          "retries": 3,
+          "startPeriod": 60
+        },
+        "portMappings": [
+          {
+            "name": "backend-flask",
+            "containerPort": 4567,
+            "protocol": "tcp", 
+            "appProtocol": "http"
+          }
+        ],
+        "logConfiguration": {
+          "logDriver": "awslogs",
+          "options": {
+              "awslogs-group": "cruddur",
+              "awslogs-region": "<region>",
+              "awslogs-stream-prefix": "backend-flask"
+          }
+        },
+        "environment": [
+          {"name": "OTEL_SERVICE_NAME", "value": "backend-flask"},
+          {"name": "OTEL_EXPORTER_OTLP_ENDPOINT", "value": "https://api.honeycomb.io"},
+          {"name": "AWS_COGNITO_USER_POOL_ID", "value": "<redacted>"},
+          {"name": "AWS_COGNITO_USER_POOL_CLIENT_ID", "value": "<redacted>"},
+          {"name": "FRONTEND_URL", "value": "*"},
+          {"name": "BACKEND_URL", "value": "*"},
+          {"name": "AWS_DEFAULT_REGION", "value": "<region>"}
+        ],
+        "secrets": [
+          {"name": "AWS_ACCESS_KEY_ID"    , "valueFrom": "arn:aws:ssm:<region>:<redacted>:parameter/cruddur/backend-flask/AWS_ACCESS_KEY_ID"},
+          {"name": "AWS_SECRET_ACCESS_KEY", "valueFrom": "arn:aws:ssm:<region>:<redacted>:parameter/cruddur/backend-flask/AWS_SECRET_ACCESS_KEY"},
+          {"name": "CONNECTION_URL"       , "valueFrom": "arn:aws:ssm:<region>:<redacted>:parameter/cruddur/backend-flask/CONNECTION_URL" },
+          {"name": "ROLLBAR_ACCESS_TOKEN" , "valueFrom": "arn:aws:ssm:<region>:<redacted>:parameter/cruddur/backend-flask/ROLLBAR_ACCESS_TOKEN" },
+          {"name": "OTEL_EXPORTER_OTLP_HEADERS" , "valueFrom": "arn:aws:ssm:<region>:<redacted>:parameter/cruddur/backend-flask/OTEL_EXPORTER_OTLP_HEADERS" }
+        ]
+      }
+    ]
+  }
+```
+
+This policy document was then used to register the task definition with the below command:
+
+```sh
+aws ecs register-task-definition --cli-input-json file://aws/task-defintions/backend-flask.json
+```
+
+# Create Backend Service
+
+I initially created the backend service through the cli but I had to delete it as a result of the inability to shell into it as it didn't have the execute command enabled and that can only be set through the cli.
+
+![ConsleDeply](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/65e881f0-49a6-4959-afd3-11369cd7862d)
+
+### Creating service through the cli
 
 First I created and saved a file with the configuration commands so as to run the commands through the file.
+
 The below command was used to create the service through the cli
 
+### `aws/json/service-backend-flask.json`
+
+```json
+{
+    "cluster": "cruddur",
+    "launchType": "FARGATE",
+    "desiredCount": 1,
+    "enableECSManagedTags": true,
+    "enableExecuteCommand": true,
+    "networkConfiguration": {
+      "awsvpcConfiguration": {
+        "assignPublicIp": "ENABLED",
+        "securityGroups": [
+          "sg-<redacted>"
+        ],
+        "subnets": [
+          "subnet-<redacted>",
+          "subnet-<redacted>",
+          "subnet-<redacted>",
+          "subnet-<redacted>",
+          "subnet-<redacted>",
+          "subnet-<redacted>"
+        ]
+      }
+    },
+    "propagateTags": "SERVICE",
+    "serviceName": "backend-flask",
+    "taskDefinition": "backend-flask",
+    "serviceConnectConfiguration": {
+        "enabled": true,
+        "namespace": "cruddur",
+        "services": [
+          {
+            "portName": "backend-flask",
+            "discoveryName": "backend-flask",
+            "clientAliases": [{"port": 4567}]
+          }
+        ]
+      }
+  }
 ```
+
+The command used to create the service:
+
+```sh
 aws ecs create-service --cli-input-json file://aws/json/service-backend-flask.json
 ```
 
-Install sessions manager to enable us shell into the container to test the service.
+# Install Sessions Manager
+
+I installed sessions manager to enable us shell into the container to test the service.
 
 ```sh
 curl "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb" -o "session-manager-plugin.deb"
@@ -298,11 +466,11 @@ Verify it works
 session-manager-plugin
 ```
 
-(screenshot sessionmgr)
+![sessionmgr](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/c6a5c05b-6dc4-41d0-b499-0cc093bb88cb)
 
-Connect to the container
+# Connect to the container
 
-Using the below command, we will connect to the service and get a bash shell
+Using the below command, I connected to the service and got a bash shell
 
 ```
 aws ecs execute-command  \
@@ -314,11 +482,15 @@ aws ecs execute-command  \
 --interactive
 ```
 
-(screenshot bashShell)
+![bashShell](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/c43ec29e-4178-4dc7-b765-5be1d3dd186b)
 
-Setting up load balancer through the console
+# Load Balancer 
 
-(screenshot loadblcnr)
+The load balancer was created through the management console
+
+![loadblcnr](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/3a404b68-65fd-49b5-8297-6a5ec4b21623)
+
+# Push Frontend Image
 
 Build the frontend image 
 
