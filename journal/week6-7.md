@@ -393,6 +393,31 @@ aws ecs register-task-definition --cli-input-json file://aws/task-defintions/bac
 
 # Create Backend Service
 
+Before creating the service I created a security group that will be used by the service.
+
+First I set my default VPC as an env var using the command:
+
+```sh
+export DEFAULT_VPC_ID=$(aws ec2 describe-vpcs \
+--filters "Name=isDefault, Values=true" \
+--query "Vpcs[0].VpcId" \
+--output text)
+echo $DEFAULT_VPC_ID
+```
+
+Then I used the below command to create the security group.
+
+```sh
+export CRUD_SERVICE_SG=$(aws ec2 create-security-group \
+  --group-name "crud-srv-sg" \
+  --description "Security group for Cruddur services on ECS" \
+  --vpc-id $DEFAULT_VPC_ID \
+  --query "GroupId" --output text)
+echo $CRUD_SERVICE_SG
+```
+
+Now I went ahead to create the service.
+
 I initially created the backend service through the cli but I had to delete it as a result of the inability to shell into it as it didn't have the execute command enabled and that can only be set through the cli.
 
 ![ConsleDeply](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/65e881f0-49a6-4959-afd3-11369cd7862d)
@@ -400,8 +425,6 @@ I initially created the backend service through the cli but I had to delete it a
 ### Creating service through the cli
 
 First I created and saved a file with the configuration commands so as to run the commands through the file.
-
-The below command was used to create the service through the cli
 
 ### `aws/json/service-backend-flask.json`
 
@@ -444,8 +467,7 @@ The below command was used to create the service through the cli
       }
   }
 ```
-
-The command used to create the service:
+The below command was used to create the service through the cli
 
 ```sh
 aws ecs create-service --cli-input-json file://aws/json/service-backend-flask.json
