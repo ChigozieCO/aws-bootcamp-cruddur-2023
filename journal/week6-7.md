@@ -467,11 +467,14 @@ First I created and saved a file with the configuration commands so as to run th
       }
   }
 ```
-The below command was used to create the service through the cli
+
+I could then use the below command to create the service through the cli
 
 ```sh
 aws ecs create-service --cli-input-json file://aws/json/service-backend-flask.json
 ```
+
+Healthy container
 
 # Install Sessions Manager
 
@@ -490,6 +493,26 @@ session-manager-plugin
 
 ![sessionmgr](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/c6a5c05b-6dc4-41d0-b499-0cc093bb88cb)
 
+This was also added to my `gitpod.yml` and my `postCreateCommand.sh` files so that when next my code environments are launched the sessions manager is installed in that environment.
+
+For Gitpod
+
+```yml
+  - name: fargate
+    before: |
+      curl "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb" -o "session-manager-plugin.deb"
+      sudo dpkg -i session-manager-plugin.deb
+      cd backend-flask
+```
+
+For Codespaces
+
+```sh
+# Fargate
+curl "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb" -o "session-manager-plugin.deb"
+sudo dpkg -i session-manager-plugin.deb
+```
+
 # Connect to the container
 
 Using the below command, I connected to the service and got a bash shell
@@ -506,9 +529,48 @@ aws ecs execute-command  \
 
 ![bashShell](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/c43ec29e-4178-4dc7-b765-5be1d3dd186b)
 
+To simplify the process and automate it for future use, I created a script to help connect to the ecs service. This script will then be passed in the command whenever I want to connect to the service.
+
+The contents of the script is below:
+
+```sh
+#!/usr/bin/bash
+
+if [ -z "$1" ]; then
+  echo "No TASK_ID argument supplied eg ./bin/ecs/connect-to-backend-flask 1ebdab5b643d42cab1429199aa48a127"
+  exit 1
+fi
+TASK_ID=$1
+
+CONTAINER_NAME=backend-flask
+
+echo "Task ID: $TASK_ID"
+echo "Container name: $CONTAINER_NAME"
+
+aws ecs execute-command  \
+--region $AWS_DEFAULT_REGION \
+--cluster cruddur \
+--task $TASK_ID \
+--container $CONTAINER_NAME \
+--command "/bin/bash" \
+--interactive
+```
+
 # Load Balancer 
 
-The load balancer was created through the management console
+The load balancer was created through the management console.
+
+- From Compute, click on EC2
+- In the EC2 console, select Load Balancers from the list of features on the right.
+- Click on `create` on the Application Load Balancer option.
+- Enter the `Load Balancer name`
+- Leave it as `internet facing` scheme and `ipv4` Ip address type.
+- In the Network Mapping section, select the VPC you would like to use.
+- Then select all the AZs (which will select the subnets as well) under the vpc.
+- Select your security group, if you dont yet have the one you'd like to use create a new one (which was what we did here).
+- Next we create a target group if it doesn't already exist.
+- I connected my backend and frontend load balancers
+- Click `create load balancer`.
 
 ![loadblcnr](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/3a404b68-65fd-49b5-8297-6a5ec4b21623)
 
