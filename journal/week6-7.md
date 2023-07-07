@@ -474,7 +474,11 @@ I could then use the below command to create the service through the cli
 aws ecs create-service --cli-input-json file://aws/json/service-backend-flask.json
 ```
 
+![Workng Container](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/10d1abb3-d269-4bb4-979f-cb54fca7f219)
+
 Healthy container
+
+![Health Container](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/09fccb03-6a07-4d52-ae56-b8d552229773)
 
 # Install Sessions Manager
 
