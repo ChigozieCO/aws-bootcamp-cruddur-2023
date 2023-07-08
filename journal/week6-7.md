@@ -580,6 +580,13 @@ The load balancer was created through the management console.
 
 # Push Frontend Image
 
+I set the frontend url
+
+```sh
+export ECR_FRONTEND_REACT_URL="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/frontend-react-js"
+echo $ECR_FRONTEND_REACT_URL
+```
+
 I created a task definition file for my frontend react app. The file contains the below:
 
 ```json
@@ -739,7 +746,7 @@ docker build \
 
 (screenshot frontendimg)
 
-### Build the Frontend Repo
+### Push the Frontend Image
 
 First I ensure I was loged in to ECR, before you perform operations in ECR you must make sure that I are logged in. 
 
@@ -758,6 +765,12 @@ aws ecr create-repository \
 ```
  
 (screenshot frntendRepo)
+
+I then tagged the image
+
+```sh
+docker tag frontend-react-js:latest $ECR_FRONTEND_REACT_URL:latest
+```
 
 Then I pushed the image to the repo
 
