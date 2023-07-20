@@ -42,8 +42,8 @@
         "environment": [
           {"name": "OTEL_SERVICE_NAME", "value": "backend-flask"},
           {"name": "OTEL_EXPORTER_OTLP_ENDPOINT", "value": "https://api.honeycomb.io"},
-          {"name": "AWS_COGNITO_USER_POOL_ID", "value": "us-east-1_xXY5SoZKW"},
-          {"name": "AWS_COGNITO_USER_POOL_CLIENT_ID", "value": "7eloj7qq29f0tqulpnf92v41nn"},
+          {"name": "AWS_COGNITO_USER_POOL_ID", "value": "us-east-1_j03MywENw"},
+          {"name": "AWS_COGNITO_USER_POOL_CLIENT_ID", "value": "6uaqa742bq1mcs5kp98r2smdt5"},
           {"name": "FRONTEND_URL", "value": "*"},
           {"name": "BACKEND_URL", "value": "*"},
           {"name": "AWS_DEFAULT_REGION", "value": "us-east-1"}
