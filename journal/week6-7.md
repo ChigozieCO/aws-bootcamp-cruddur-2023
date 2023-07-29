@@ -842,3 +842,60 @@ I then used the command below passing the `frontend-react-js.json` task definiti
 ```sh
 aws ecs create-service --cli-input-json file://aws/json/service-frontend-react-js.json
 ```
+
+At this point I had both my frontend and backend container running and everything was working perfectly as can been seen in the screenshot below.
+
+![Cruddur app](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/06d618c6-6b1c-4a6a-8ceb-a9cffeaac2c5)
+
+Time to configure my domain on AWS.
+
+# Configure Custom Domain
+
+My custom domain was gotten from third party provider, [namecheap](namecheap.com) and not from AWS.
+
+To create a hosted zone on AWS, I navigated to the Route53 under the network and content delivery category and selected the hosted zone feature.
+
+![Creating hosted zone](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/30d140d1-9f7e-49af-a98b-2cadf39e0f44)
+
+In the domain name section I entered my doman name which is [sircloudsalot](sircloudsalot.xyz)
+
+It is a public hosted zone as can be seen from my selection in the screenshot above.
+
+After the hosted zone was created I then grabbed the nameservers (circled in the screenshot below) with which I replaced the nameservers my custom domain came with.
+
+![Hosted zone](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/af3c6efc-0752-4954-b6c7-6f269b6aeff2)
+
+I then headed to namecheap where I bought the domain from and changed the nameservers of the domain to those grabbed from AWS.
+
+![namecheap nameserver](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/254cdad4-ab07-4da6-8dc5-a9cf7b4880ed)
+
+# Create SSL Certificate
+
+The next thing I did was to create an SSL certificate, this was done from the AWS Certificate Manager (ACM).
+
+![certificate1](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/c9f2e534-4621-42b2-af34-67c49e19a879)
+
+![certificate2](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/f1d4e5c5-3a77-4145-80d6-940c598b191b)
+
+![certificate3](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/5e2b6cc7-8354-4c2c-842c-1351ab7f9473)
+
+After the SSL Certificate was created I clicked into it, scrolled down and selected the "Create Records in Route53" option.
+
+![SSL issued](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/b484b231-c6bd-4dcb-bb97-fb8cfd482604)
+
+![Record](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/c1dcace8-ed79-46a7-baf7-60a754563f69)
+
+# Edit the Loadbalancer
+
+I clicked into the load  balancer, selected the `cruddur-alb` load balancer and added a new listener.
+
+The first listener will redirect from port 80 to port 443 and the next listener will forward from port 443 to the `frontend-react-js` target group.
+
+After creating these listeners I then delete the other 2 I previously had.
+
+
+
+
+
+
+
