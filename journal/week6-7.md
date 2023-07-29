@@ -1,6 +1,6 @@
 # Week 6 — Deploying Containers & Solving CORS with a Load Balancer and Custom Domain
 
-This week we moved our app and app resources to AWS, we stored our app images in the AWS ECR, created hosted zones for the custom domains we are hosting the app on. We create d a load balancer and so many other sweet stuff that is explained in detail in this week's journal.
+This week we moved our app and app resources to AWS, we stored our app images in the AWS ECR, created hosted zones for the custom domains we are hosting the app on. We created a load balancer and so many other sweet stuff that is explained in detail in this week's journal.
 
 # Health Check
 
@@ -744,7 +744,7 @@ docker build \
 .
 ```
 
-(screenshot frontendimg)
+![frontendimg](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/64300193-8bb3-4311-b906-5ab1ba9dad4e)
 
 ### Push the Frontend Image
 
@@ -764,7 +764,7 @@ aws ecr create-repository \
   --image-tag-mutability MUTABLE
 ```
  
-(screenshot frntendRepo)
+![frontendrepo](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/e1097f1d-134c-47fe-a381-89fbcd1745d5)
 
 I then tagged the image
 
@@ -778,7 +778,8 @@ Then I pushed the image to the repo
 docker push $ECR_FRONTEND_REACT_URL:latest
 ```
 
-(screenshot FrntImageLnP)
+![FrntImageLnP](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/b6476bcc-f48c-4a22-933a-fb3a3360ff88)
+
 
 # Deploying the Frontend Container Service
 
@@ -857,7 +858,7 @@ To create a hosted zone on AWS, I navigated to the Route53 under the network and
 
 ![Creating hosted zone](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/30d140d1-9f7e-49af-a98b-2cadf39e0f44)
 
-In the domain name section I entered my doman name which is [sircloudsalot](sircloudsalot.xyz)
+In the domain name section I entered my doman name which is [sircloudsalot](https://sircloudsalot.xyz/)
 
 It is a public hosted zone as can be seen from my selection in the screenshot above.
 
@@ -902,6 +903,18 @@ The next thing I did was create two new records in Route53 to point it to my loa
 ![image](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/e021e7b5-736b-41f6-809e-c46563bf0646)
 
 The screenshot shows the configurations.
+
+# Check the Domain is Pointing at the Right Place
+
+I used curl to check that my configurations are in order
+
+```sh
+curl https://api.sircloudsalot.xyz/api/health-check
+```
+
+![health-check](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/73ba31df-17d9-47a7-a079-566919eea8dc)
+
+![sircloudsalot](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/44b513d6-e828-4934-b8ee-f0de74012c60)
 
 # Update origins and Rebuild image
 
