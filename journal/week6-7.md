@@ -893,6 +893,17 @@ The first listener will redirect from port 80 to port 443 and the next listener 
 
 After creating these listeners I then delete the other 2 I previously had.
 
+Then I added a new rule to the https:443 listener. I added it on the http header `api.sircloudsalot.xyz` to forward the backend-flask target group.
+
+![New rules](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/1c474ce3-c2fd-4ac0-ba87-c68a448b7e85)
+
+The next thing I did was create two new records in Route53 to point it to my loadbalancer. One for the naked domain and the other for the api subdomain.
+
+![image](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/e021e7b5-736b-41f6-809e-c46563bf0646)
+
+The screenshot shows the configurations.
+
+# Update origins and Rebuild image
 
 
 
