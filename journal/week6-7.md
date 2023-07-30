@@ -918,6 +918,22 @@ curl https://api.sircloudsalot.xyz/api/health-check
 
 # Update origins and Rebuild image
 
+Owing to the fact that our origins is open up to everything (we used wildcards for our fronend and backend urls in the backend task definition) I will now update their values in order to get the endpoints working correctly.
+
+This was done by updating the `aws/task-definitions/backend-flask.json` file with the below values
+
+```json
+...
+          {"name": "FRONTEND_URL", "value": "https://sircloudsalot.xyz"},
+          {"name": "BACKEND_URL", "value": "https://api.sircloudsalot.xyz"},
+...
+```
+
+This way our frontend would work because it is now pointing to the correct thing.
+
+We then update our backend task definition by registering it again and also rebuild our frontgend image and push to AWS ECR.
+
+The commands to these have already been shown previously above.
 
 
 
