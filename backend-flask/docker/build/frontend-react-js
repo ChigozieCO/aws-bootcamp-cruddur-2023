@@ -1,0 +1,10 @@
+#!/usr/bin/bash
+
+docker build \
+--build-arg REACT_APP_BACKEND_URL="https://api.sircloudsalot.xyz" \
+--build-arg REACT_APP_AWS_PROJECT_REGION="$AWS_DEFAULT_REGION" \
+--build-arg REACT_APP_AWS_COGNITO_REGION="$AWS_DEFAULT_REGION" \
+--build-arg REACT_APP_AWS_USER_POOLS_ID="us-east-1_j03MywENw" \
+--build-arg REACT_APP_CLIENT_ID="6uaqa742bq1mcs5kp98r2smdt5" \
+-t frontend-react-js \
+.

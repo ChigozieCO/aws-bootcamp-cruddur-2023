@@ -935,6 +935,23 @@ We then update our backend task definition by registering it again and also rebu
 
 The commands to these have already been shown previously above.
 
+# Secure Backend and Restructure Files
+
+After configuring the frontend and backend on my custom domain we discovered that our app was leaking too much information to users and so we had to fix that.
+
+It was obvous that it was the `ENV FLASK_DEBUG=1` line of code that was causing the information leakage (leakeage of that nature is ok )
+
+The first thing we did was to lockdown access to our loadbalacer by limiting access to it to on my IP address.
+
+I edited the `cruddur-alb-sg` security group. The editing involved deleting inbound rules allowing access from port 4567 and port 3000 then updating access from port 80 to traffic originating from only my IP address.
+
+To fix the information leakage, I deleted the `ENV FLASK_DEBUG=1` line of code and updated the `CMD` line of code as shown below
+
+```sh
+CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0", "--port=4567", "--no-debug","--no-debugger","--no-reload"]
+```
+
+I created additional scripts to automate ecr login and container build, then moved the new as well as the previous scripts up a directory.
 
 
 
