@@ -388,7 +388,7 @@ First I saved the definition policy in my file name `backend-flask.json` in the 
 This policy document was then used to register the task definition with the below command:
 
 ```sh
-aws ecs register-task-definition --cli-input-json file://aws/task-defintions/backend-flask.json
+aws ecs register-task-definition --cli-input-json file://aws/task-definitions/backend-flask.json
 ```
 
 # Create Backend Service
