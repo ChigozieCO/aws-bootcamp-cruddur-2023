@@ -957,8 +957,64 @@ I created additional scripts to automate ecr login and container build, then mov
 
 We have been experiencing the issue where sometimes when we make API requests our  cognito token expires without attempting to renew our token.
 
+To fix this issue, we first updated the `CheckAuth` lib with the following code
 
+```js
+...
 
+export async function getAccessToken(){
+  Auth.currentSession()
+  .then((cognito_user_session) => {
+    const access_token = cognito_user_session.accessToken.jwtToken
+    localStorage.setItem("access_token", access_token)
+  })
+  .catch((err) => console.log(err));
+}
+
+export async function checkAuth(setUser){
+
+...
+...
+
+  .then((cognito_user) => {
+    console.log('cognito_user',cognito_user);
+    setUser({
+      display_name: cognito_user.attributes.name,
+      handle: cognito_user.attributes.preferred_username
+    })
+    return Auth.currentSession()
+  }).then((cognito_user_session) => {
+      console.log('cognito_user_session',cognito_user_session);
+      localStorage.setItem("access_token", cognito_user_session.accessToken.jwtToken)
+  })
+  .catch((err) => console.log(err));
+};
+
+```
+
+After this update I then upated the imported checkauth function on the pages using authorization by also importing the new `getAccessToken` function. The updated pages were:
+
+`MessageForm.js`
+`HomeFeedPage.js`
+`MessageGroupNewPage.js`
+`MessageGroupPage.js`
+`MessageGroupsPage.js`
+
+The code below is what was added to the above pages
+
+```js
+...
+import {checkAuth, getAccessToken} from '../lib/CheckAuth';
+
+...
+
+      await getAccessToken()
+      const access_token = localStorage.getItem("access_token")
+
+          Authorization: `Bearer ${access_token}`
+```
+
+# Configure Container Insights to have X-Ray
 
 
 
