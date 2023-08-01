@@ -951,7 +951,13 @@ To fix the information leakage, I deleted the `ENV FLASK_DEBUG=1` line of code a
 CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0", "--port=4567", "--no-debug","--no-debugger","--no-reload"]
 ```
 
-I created additional scripts to automate ecr login and container build, then moved the new as well as the previous scripts up a directory.
+I created additional scripts to automate ecr login and container build, then moved the new as well as the previous scripts up a directory so that m scripts were top level and no longer only in the `backend-flask` directory.
+
+# Resolving Expired Token Session
+
+We have been experiencing the issue where sometimes when we make API requests our  cognito token expires without attempting to renew our token.
+
+
 
 
 
