@@ -1016,5 +1016,27 @@ import {checkAuth, getAccessToken} from '../lib/CheckAuth';
 
 # Configure Container Insights to have X-Ray
 
+To use X-Ray in our container insights we had to include that in our backend task definition and update the task definition.
+
+The include X-Ray code is shown below:
+
+```json
+...
+    {
+      "name": "xray",
+      "image": "public.ecr.aws/xray/aws-xray-daemon" ,
+      "essential": true,
+      "user": "1337",
+      "portMappings": [
+        {
+          "name": "xray",
+          "containerPort": 2000,
+          "protocol": "udp"
+        }
+      ]
+    },
+...
+```
+
 
 
