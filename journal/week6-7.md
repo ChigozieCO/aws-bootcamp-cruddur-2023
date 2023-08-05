@@ -1038,5 +1038,89 @@ The include X-Ray code is shown below:
 ...
 ```
 
+# Generate out ENV Vars
 
+To simplify our code and improve our docker networks we created an `erb` directory for both gitpod and codespaces.
 
+The following files were added to the erb directory
+
+`backend-flask-codespace.env.erb`
+`backend-flask.env.erb`
+`frontend-react-js-codespaces.env.erb`
+`frontend-react-js.env.erb`
+
+These files contain the env vars that will we used to generate the env vars for the frontend and frontend.
+
+Because I alternate between gitpod and codespaces I made file that I will use with each IDE.
+
+I was then able to take out the env vars listed in the docker compose file and replace with the env file for backend and frontend.
+
+```yml
+
+...
+
+    env_file:
+      - backend-flask.env
+
+...
+
+    env_file:
+      - frontend-react-js.env
+
+```
+
+The next thing was to create the scripts that would be useed to generate out the env vars.
+
+As I did above I created specific files for both gitpod and codespace, these file contain almost the same thing with just minor differences to the file paths.
+
+I also edited the network part of the docker-compose file and included the network bit to every service in the docker-compose.yml
+
+```yml
+
+...
+
+    networks:
+      - cruddur-net
+
+...
+
+networks: 
+  cruddur-net:
+    driver: bridge
+    name: cruddur
+    name: cruddur-net
+```
+
+With all these new changes I updated my `.gitpod.yml` file and my `postCreateCommand.sh` file.
+
+These edits will make it possible for the correct env vars to be generated out whenever these IDEs are launched.
+
+### For gitpod 
+
+```yml
+
+...
+
+      source "$THEIA_WORKSPACE_ROOT/bin/frontend/generate-env"
+
+...
+
+      source "$THEIA_WORKSPACE_ROOT/bin/backend/generate-env"
+
+```
+
+### For Codespaces
+
+To ensure that env vars are generated out whenever I use codespace I update my `postCreateCommand.sh` file with the code below
+
+```sh
+# Create Env for codespace
+ruby "/workspaces/aws-bootcamp-cruddur-2023/bin/backend/generate-env-codespace"
+ruby "/workspaces/aws-bootcamp-cruddur-2023/bin/frontend/generate-env-codespace"
+```
+
+# Health check for X-Ray
+
+I added the below code to implement a health check for the X_Ray container in frontend and backend taskdefinitions.
+
+```
