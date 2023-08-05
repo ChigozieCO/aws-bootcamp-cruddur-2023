@@ -1,6 +1,11 @@
 ARG baseimage
 FROM ${baseimage}
 
+# [TODO] For debugging, don't leave these in
+#RUN apt-get update -y
+#RUN apt-get install iputils-ping -y
+# -----
+
 # Inside the container
 # Make a new folder inside the container
 WORKDIR /backend-flask
