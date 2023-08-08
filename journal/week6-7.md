@@ -1119,8 +1119,10 @@ ruby "/workspaces/aws-bootcamp-cruddur-2023/bin/backend/generate-env-codespace"
 ruby "/workspaces/aws-bootcamp-cruddur-2023/bin/frontend/generate-env-codespace"
 ```
 
-# Health check for X-Ray
+# Implement fix for Timezone
 
-I added the below code to implement a health check for the X_Ray container in frontend and backend taskdefinitions.
+To round but this week we implemented changes to the timezone so that our app timing would be more accurate.
 
-```
+We extracted the timezone block of code to have its own file and imported the functions into the necessary files.
+
+Changes made can be seen in [this commit](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/commit/a89476892134220999df2175d9996d22ffbc34ad)
