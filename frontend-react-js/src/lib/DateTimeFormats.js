@@ -1,13 +1,13 @@
 import { DateTime } from 'luxon';
 
 export function format_datetime(value) {
-  const datetime = DateTime.fromISO(value, { zone: 'utc' })
+  const datetime = DateTime.fromISO(value, { zone: 'gmt' })
   const local_datetime = datetime.setZone(Intl.DateTimeFormat().resolvedOptions().timeZone);
   return local_datetime.toLocaleString(DateTime.DATETIME_FULL)
 }
 
 export function message_time_ago(value){
-  const datetime = DateTime.fromISO(value, { zone: 'utc' })
+  const datetime = DateTime.fromISO(value, { zone: 'gmt' })
   const created = datetime.setZone(Intl.DateTimeFormat().resolvedOptions().timeZone);
   const now     = DateTime.now()
   console.log('message_time_group',created,now)
@@ -27,7 +27,7 @@ export function message_time_ago(value){
 }
 
 export function time_ago(value){
-  const datetime = DateTime.fromISO(value, { zone: 'utc' })
+  const datetime = DateTime.fromISO(value, { zone: 'gmt' })
   const future = datetime.setZone(Intl.DateTimeFormat().resolvedOptions().timeZone);
   const now     = DateTime.now()
   const diff_mins = now.diff(future, 'minutes').toObject().minutes;
