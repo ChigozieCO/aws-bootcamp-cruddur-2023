@@ -27,6 +27,10 @@ tasks:
       sudo dpkg -i session-manager-plugin.deb
       cd backend-flask
 
+  - name: cdk
+    before: |
+      npm install aws-cdk -g
+
   - name: postgres
     before: |
       curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc|sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg

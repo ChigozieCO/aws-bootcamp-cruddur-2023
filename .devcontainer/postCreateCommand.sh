@@ -23,3 +23,6 @@ sudo dpkg -i session-manager-plugin.deb
 # Create Env for codespace
 ruby "/workspaces/aws-bootcamp-cruddur-2023/bin/backend/generate-env-codespace"
 ruby "/workspaces/aws-bootcamp-cruddur-2023/bin/frontend/generate-env-codespace"
+
+# CDK
+npm install aws-cdk -g
