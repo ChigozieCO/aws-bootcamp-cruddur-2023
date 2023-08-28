@@ -46,6 +46,10 @@ tasks:
     command: |
       export GITPOD_IP=$(curl ifconfig.me)
       source "$THEIA_WORKSPACE_ROOT/bin/rds/update-sg-rule"
+  
+  - name: sharp
+    command: |
+      source "$THEIA_WORKSPACE_ROOT/bin/serverless/sharp"
       
 vscode:
   extensions:
