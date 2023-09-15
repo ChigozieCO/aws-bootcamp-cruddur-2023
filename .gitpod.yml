@@ -49,7 +49,7 @@ tasks:
   
   - name: sharp
     command: |
-      source "$THEIA_WORKSPACE_ROOT/bin/serverless/sharp"
+      source "$THEIA_WORKSPACE_ROOT/bin/avatar/sharp"
       
 vscode:
   extensions:
