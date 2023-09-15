@@ -1023,9 +1023,9 @@ Next I created a dynamodb table by running the below command:
 ./bin/ddb/schema-load prod
 ```
 
-![ddb cli](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/3cba2b30-684b-4789-8ae2-0ea0c3732143)
+![ddb cli](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/3cba2b30-684b-4789-8ae2-0ea0c3732143)
 
-![ddb Console](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/87c5c863-c91b-4f81-b581-eb4552221aed)
+![ddb Console](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/87c5c863-c91b-4f81-b581-eb4552221aed)
 
 ### Turn on Dynamodb Stream
 
@@ -1035,7 +1035,7 @@ Scroll down to DynamoDB stream details and turn it on.
 
 Select "New Image"
 
-![ddb stream](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/1a35dc8e-5e0f-40e6-99bb-46cee70892e2)
+![ddb stream](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/1a35dc8e-5e0f-40e6-99bb-46cee70892e2)
 
 ### Create VPC endpoint
 
@@ -1050,7 +1050,7 @@ Select "New Image"
 - Select Full Access
 - Then Create
 
-![vpc endpoint](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/eb26c773-2be0-43e7-9cfc-ef4d4cd3d3ff)
+![vpc endpoint](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/eb26c773-2be0-43e7-9cfc-ef4d4cd3d3ff)
 
 ### Cruddur Messaging Stream Lambda
 
@@ -1152,9 +1152,9 @@ Select 'Create Trigger'
 
 Enter the settings as shown below:
 
-![Trigger](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/27922a03-4f3e-4137-be19-806536e28b1d)
+![Trigger](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/27922a03-4f3e-4137-be19-806536e28b1d)
 
-![Lambda](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/d8f5488c-e453-453c-b8c3-d666e68cd65f)
+![Lambda](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/d8f5488c-e453-453c-b8c3-d666e68cd65f)
 
 Now we go back and restart our container and test our messaging.
 

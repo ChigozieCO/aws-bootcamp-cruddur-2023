@@ -12,7 +12,7 @@ Honeycomb has both the free and trial versaion and for this project I created a 
 
 Honeycomb comes with a default environment called test but I created a specific environment which I named bootcamp to use for this project.
 
-![Honeycomb bootcamp environment](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/1d66b131-f90a-424b-92bc-30c3d8903b02)
+![Honeycomb bootcamp environment](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/1d66b131-f90a-424b-92bc-30c3d8903b02)
 
 
 After creating this environment I was then able to take the Api key for the enviroment and export to my gitpod environment using the below code.
@@ -29,7 +29,7 @@ The export command exports to the present environment while the gp command is us
 
 - #### Implement Open Telemetry (OTEL)
 
-To install the Open Telemetry (OTEL) dependencies I added the below lines of code to the [`requirements.txt`](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/blob/main/backend-flask/requirements.txt)
+To install the Open Telemetry (OTEL) dependencies I added the below lines of code to the [`requirements.txt`](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/blob/main/backend-flask/requirements.txt)
 
 ```
 opentelemetry-api 
@@ -45,7 +45,7 @@ Then I installed these dependencies by running:
 pip install -r requirements.txt
 ```
 
-To use Open Telemetry (OTEL) with Honeycomb as provider I had to configure the backend flask app by adding the below code to my [docker-compose.yml](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/blob/main/docker-compose.yml) file. These environment variables were added to `backend-flask` of the docker-compose.yml
+To use Open Telemetry (OTEL) with Honeycomb as provider I had to configure the backend flask app by adding the below code to my [docker-compose.yml](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/blob/main/docker-compose.yml) file. These environment variables were added to `backend-flask` of the docker-compose.yml
 
 ```yml
 OTEL_EXPORTER_OTLP_ENDPOINT: "https://api.honeycomb.io"
@@ -55,7 +55,7 @@ OTEL_SERVICE_NAME: "${HONEYCOMB_SERVICE_NAME}"
 
 - #### Console Tracing
 
-In other to start getting traces in honeycomb, I added the following lines of code to the [`app.py`](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/blob/main/backend-flask/app.py):
+In other to start getting traces in honeycomb, I added the following lines of code to the [`app.py`](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/blob/main/backend-flask/app.py):
 
 ```py
 # Honeycomb
@@ -89,7 +89,7 @@ docker compose up
 
 - #### Adding Spans and Attributes
 
-I created spans by acquiring a tracer and spans codes from [Honecomb.io Documentation](https://docs.honeycomb.io/getting-data-in/opentelemetry/python-distro/) and added the code to my [`home_activities.py`](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/blob/main/backend-flask/services/home_activities.py). See code below:
+I created spans by acquiring a tracer and spans codes from [Honecomb.io Documentation](https://docs.honeycomb.io/getting-data-in/opentelemetry/python-distro/) and added the code to my [`home_activities.py`](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/blob/main/backend-flask/services/home_activities.py). See code below:
 
 ```py
 from opentelemetry import trace
@@ -119,7 +119,7 @@ provider.add_span_processor(simple_processor)
 
 - Run Query
 
-![backend flask trace](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/3969a3ba-9e03-4908-84da-6bc676f4b33a)
+![backend flask trace](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/3969a3ba-9e03-4908-84da-6bc676f4b33a)
 
 
 ## Instrument X-Ray
@@ -202,7 +202,7 @@ After all this I proceeded to run docker compose up to see the data collected by
 
 - #### Adding custom segment/subsegment
 
-To further filter X-Ray tracing, I created a subsegment by adding codes to [`user_activities.py`](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/blob/main/backend-flask/services/user_activities.py)
+To further filter X-Ray tracing, I created a subsegment by adding codes to [`user_activities.py`](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/blob/main/backend-flask/services/user_activities.py)
 
 ```py
 from aws_xray_sdk.core import xray_recorder
@@ -218,7 +218,7 @@ from aws_xray_sdk.core import xray_recorder
 
 With this I was then able to get data in my subsegments.
 
-![XraySubSeg](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/1a71f2c4-a536-45eb-acc5-abb5fbd32a3d)
+![XraySubSeg](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/1a71f2c4-a536-45eb-acc5-abb5fbd32a3d)
 
 
 ## CloudWatch
@@ -285,7 +285,7 @@ Also had to add the required env vars to the `docker-compose.yml` file:
 With all these setup, I was then able to collect the required cloudwatch logs
 
 
-![CloudWatch](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/905a7c42-e380-4ed3-8734-bc83fdb9b06f)
+![CloudWatch](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/905a7c42-e380-4ed3-8734-bc83fdb9b06f)
 
 ## Rollbar
 

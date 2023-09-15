@@ -32,9 +32,9 @@ aws rds create-db-instance \
   --no-deletion-protection
 ```
 
-![RDS cli](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/b71b3e2d-17c0-46ec-b029-923a11d89e99)
+![RDS cli](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/b71b3e2d-17c0-46ec-b029-923a11d89e99)
 
-![RDS console](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/c54f4dd8-c938-4b56-b720-7860dce41cdf)
+![RDS console](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/c54f4dd8-c938-4b56-b720-7860dce41cdf)
 
 
 When the RDS instance was in the running state I stopped it temporarily to ensure I do not incure extra charges, it will remain in this state until I am ready to use the database. 
@@ -433,7 +433,7 @@ Next I update my `.gitpod.yml` file with the command below:
 
 Now whenever I launch my IDEs their current IP is saved and the correct value is used to update my RDS security group rule.
 
-![Security group](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/37d70f63-e024-496e-bd4d-a84840492838)
+![Security group](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/37d70f63-e024-496e-bd4d-a84840492838)
 
 
 # Install Postgres client, Implement DB Object and Connection Pool
@@ -524,7 +524,7 @@ The Lambda function we will be creating here will insert new users and their det
 
 Through the AWS console I created a new Lambda function, it was setup as shown in the image below
 
-![cruddur-post-configuration function](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/0f3a8bf0-bb0c-49ea-8f70-83f8faac4182)
+![cruddur-post-configuration function](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/0f3a8bf0-bb0c-49ea-8f70-83f8faac4182)
 
 ### Add Layer
 
@@ -534,7 +534,7 @@ I selected the appropratiate arn from [here](https://github.com/jetbridge/psycop
 
 THe settings for the layer is shown below:
 
-![Lambda Layer](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/89775a03-c257-4ae0-90bc-b74a2b3e5327)
+![Lambda Layer](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/89775a03-c257-4ae0-90bc-b74a2b3e5327)
 
 ### Lambda Code
 
@@ -617,11 +617,11 @@ In the default role created with the Lambda, I clicked on `add permission`, clic
 }
 ```
 
-![EC2 Policy](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/2eb3bb1b-618d-4c43-be0e-63a51b4d9ec7)
+![EC2 Policy](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/2eb3bb1b-618d-4c43-be0e-63a51b4d9ec7)
 
 I then add this new policy to the default role and save the changes
 
-![Lambda role](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/78ed006e-0877-4ad9-ab8a-5daec0948dbb)
+![Lambda role](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/78ed006e-0877-4ad9-ab8a-5daec0948dbb)
 
 
 ### Add Env Var
@@ -630,9 +630,9 @@ The CONNECTION_URL is mentioned in the function code and so we need to add it as
 
 This is done by clicking on the Configurations tab of the function and selecting environment varibles, this where I will enter the CONNECTION_URL. The url here is the PROD_CONNECTION_URL which I setup earlier.
 
-![Lambda Env Var](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/afbf2fb9-e19f-4ae2-8812-25d5200a3ffe)
+![Lambda Env Var](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/afbf2fb9-e19f-4ae2-8812-25d5200a3ffe)
 
-![Function env var](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/36d8fb76-cdfa-4df1-8743-bb2d57e814c2)
+![Function env var](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/36d8fb76-cdfa-4df1-8743-bb2d57e814c2)
 
 ### Connect Function to a VPC
 
@@ -648,7 +648,7 @@ In AWS Cognito, I select my `cruddur-user-pool`, navigate to User pool propertie
 
 The required configuration is as shown below:
 
-![Lambda Trigger](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/c4f99ab0-0e82-40d2-b9df-a57a9bc45357)
+![Lambda Trigger](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/c4f99ab0-0e82-40d2-b9df-a57a9bc45357)
 
 # Refactor the db library
 

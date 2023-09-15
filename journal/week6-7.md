@@ -73,7 +73,7 @@ aws ecs create-cluster \
 --service-connect-defaults namespace=cruddur
 ```
 
-![ECS-cluster](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/15a98465-496d-4349-92bc-8dacd42e813c)
+![ECS-cluster](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/15a98465-496d-4349-92bc-8dacd42e813c)
 
 # Pushing Images
 
@@ -116,7 +116,7 @@ Now I was ready to pull down the python image from dockler hub.
 docker pull python:3.10-slim-buster
 ```
 
-![Python-image](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/920dde3b-b611-4efc-933d-ccd50a5a17c0)
+![Python-image](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/920dde3b-b611-4efc-933d-ccd50a5a17c0)
 
 Next we tag the image with our previous set path
 
@@ -130,13 +130,13 @@ Then we push it
 docker push $ECR_PYTHON_URL:3.10-slim-buster
 ```
 
-![PushImg1](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/eab2809c-c774-44b6-b3bb-4f96fce3a8f1)
+![PushImg1](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/eab2809c-c774-44b6-b3bb-4f96fce3a8f1)
 
 ### Push Backend Image
 
 Because the source of the base image had changed (we are now pulling the image from ECR and not docker hub anymore) I need to update the backend Dockerfile to pull the base image from AWS ECR instead of docker hub.
 
-Seeing that I did not want to expose my aws account ID I added a context to the [`docker-compose`](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/blob/acc4d2a31e96c80995801a131072e01f548fe65b/docker-compose.yml) file where I defined the base image as
+Seeing that I did not want to expose my aws account ID I added a context to the [`docker-compose`](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/blob/acc4d2a31e96c80995801a131072e01f548fe65b/docker-compose.yml) file where I defined the base image as
 
 ```yml
     build: 
@@ -175,9 +175,9 @@ To build this image I made sure to specify the build argument I added to the doc
 docker build -t backend-flask --build-arg baseimage=$ECR_PYTHON_URL:3.10-slim-buster . 
 ```
 
-![BuildingBkend1](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/9919e320-2c86-42b4-9b2e-31d6280e3de2)
+![BuildingBkend1](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/9919e320-2c86-42b4-9b2e-31d6280e3de2)
 
-![BuildingBkend2](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/5405793d-2467-47b3-909b-bbdf613e9764)
+![BuildingBkend2](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/5405793d-2467-47b3-909b-bbdf613e9764)
 
 Next we tag and push the image
 
@@ -186,7 +186,7 @@ docker tag backend-flask:latest $ECR_BACKEND_FLASK_URL:latest
 docker push $ECR_BACKEND_FLASK_URL:latest
 ```
 
-![Pushimg2](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/0d815015-d61b-419d-9d74-ab05a1f2000f)
+![Pushimg2](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/0d815015-d61b-419d-9d74-ab05a1f2000f)
 
 # Set Parameter store
 
@@ -204,9 +204,9 @@ aws ssm put-parameter --type "SecureString" --name "/cruddur/backend-flask/ROLLB
 aws ssm put-parameter --type "SecureString" --name "/cruddur/backend-flask/OTEL_EXPORTER_OTLP_HEADERS" --value "x-honeycomb-team=$HONEYCOMB_API_KEY"
 ```
 
-![parastore](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/10e202a9-0d63-4222-b1fc-c3b2f3538eca)
+![parastore](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/10e202a9-0d63-4222-b1fc-c3b2f3538eca)
 
-![ParaStore2](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/8ffa9679-0d1b-4826-9860-226d2b2e0b62)
+![ParaStore2](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/8ffa9679-0d1b-4826-9860-226d2b2e0b62)
 
 # Execution Roles & Task Definition 
 
@@ -268,7 +268,7 @@ aws iam put-role-policy \
     --policy-document file://aws/policies/service-execution-policy.json 
 ```
 
-![ServiceExecRole](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/5bea3a3f-b058-4646-9173-6b3fedaee061)
+![ServiceExecRole](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/5bea3a3f-b058-4646-9173-6b3fedaee061)
 
 ### `CruddurTaskRole`
 
@@ -420,7 +420,7 @@ Now I went ahead to create the service.
 
 I initially created the backend service through the cli but I had to delete it as a result of the inability to shell into it as it didn't have the execute command enabled and that can only be set through the cli.
 
-![ConsleDeply](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/65e881f0-49a6-4959-afd3-11369cd7862d)
+![ConsleDeply](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/65e881f0-49a6-4959-afd3-11369cd7862d)
 
 ### Creating service through the cli
 
@@ -474,11 +474,11 @@ I could then use the below command to create the service through the cli
 aws ecs create-service --cli-input-json file://aws/json/service-backend-flask.json
 ```
 
-![Workng Container](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/10d1abb3-d269-4bb4-979f-cb54fca7f219)
+![Workng Container](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/10d1abb3-d269-4bb4-979f-cb54fca7f219)
 
 Healthy container
 
-![Health Container](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/09fccb03-6a07-4d52-ae56-b8d552229773)
+![Health Container](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/09fccb03-6a07-4d52-ae56-b8d552229773)
 
 # Install Sessions Manager
 
@@ -495,7 +495,7 @@ Verify it works
 session-manager-plugin
 ```
 
-![sessionmgr](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/c6a5c05b-6dc4-41d0-b499-0cc093bb88cb)
+![sessionmgr](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/c6a5c05b-6dc4-41d0-b499-0cc093bb88cb)
 
 This was also added to my `gitpod.yml` and my `postCreateCommand.sh` files so that when next my code environments are launched the sessions manager is installed in that environment.
 
@@ -531,7 +531,7 @@ aws ecs execute-command  \
 --interactive
 ```
 
-![bashShell](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/c43ec29e-4178-4dc7-b765-5be1d3dd186b)
+![bashShell](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/c43ec29e-4178-4dc7-b765-5be1d3dd186b)
 
 To simplify the process and automate it for future use, I created a script to help connect to the ecs service. This script will then be passed in the command whenever I want to connect to the service.
 
@@ -576,7 +576,7 @@ The load balancer was created through the management console.
 - I connected my backend and frontend load balancers
 - Click `create load balancer`.
 
-![loadblcnr](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/3a404b68-65fd-49b5-8297-6a5ec4b21623)
+![loadblcnr](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/3a404b68-65fd-49b5-8297-6a5ec4b21623)
 
 # Push Frontend Image
 
@@ -744,7 +744,7 @@ docker build \
 .
 ```
 
-![frontendimg](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/64300193-8bb3-4311-b906-5ab1ba9dad4e)
+![frontendimg](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/64300193-8bb3-4311-b906-5ab1ba9dad4e)
 
 ### Push the Frontend Image
 
@@ -764,7 +764,7 @@ aws ecr create-repository \
   --image-tag-mutability MUTABLE
 ```
  
-![frontendrepo](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/e1097f1d-134c-47fe-a381-89fbcd1745d5)
+![frontendrepo](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/e1097f1d-134c-47fe-a381-89fbcd1745d5)
 
 I then tagged the image
 
@@ -778,7 +778,7 @@ Then I pushed the image to the repo
 docker push $ECR_FRONTEND_REACT_URL:latest
 ```
 
-![FrntImageLnP](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/b6476bcc-f48c-4a22-933a-fb3a3360ff88)
+![FrntImageLnP](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/b6476bcc-f48c-4a22-933a-fb3a3360ff88)
 
 
 # Deploying the Frontend Container Service
@@ -846,7 +846,7 @@ aws ecs create-service --cli-input-json file://aws/json/service-frontend-react-j
 
 At this point I had both my frontend and backend container running and everything was working perfectly as can been seen in the screenshot below.
 
-![Cruddur app](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/06d618c6-6b1c-4a6a-8ceb-a9cffeaac2c5)
+![Cruddur app](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/06d618c6-6b1c-4a6a-8ceb-a9cffeaac2c5)
 
 Time to configure my domain on AWS.
 
@@ -856,7 +856,7 @@ My custom domain was gotten from third party provider, [namecheap](namecheap.com
 
 To create a hosted zone on AWS, I navigated to the Route53 under the network and content delivery category and selected the hosted zone feature.
 
-![Creating hosted zone](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/30d140d1-9f7e-49af-a98b-2cadf39e0f44)
+![Creating hosted zone](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/30d140d1-9f7e-49af-a98b-2cadf39e0f44)
 
 In the domain name section I entered my doman name which is [sircloudsalot](https://sircloudsalot.xyz/)
 
@@ -864,27 +864,27 @@ It is a public hosted zone as can be seen from my selection in the screenshot ab
 
 After the hosted zone was created I then grabbed the nameservers (circled in the screenshot below) with which I replaced the nameservers my custom domain came with.
 
-![Hosted zone](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/af3c6efc-0752-4954-b6c7-6f269b6aeff2)
+![Hosted zone](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/af3c6efc-0752-4954-b6c7-6f269b6aeff2)
 
 I then headed to namecheap where I bought the domain from and changed the nameservers of the domain to those grabbed from AWS.
 
-![namecheap nameserver](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/254cdad4-ab07-4da6-8dc5-a9cf7b4880ed)
+![namecheap nameserver](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/254cdad4-ab07-4da6-8dc5-a9cf7b4880ed)
 
 # Create SSL Certificate
 
 The next thing I did was to create an SSL certificate, this was done from the AWS Certificate Manager (ACM).
 
-![certificate1](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/c9f2e534-4621-42b2-af34-67c49e19a879)
+![certificate1](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/c9f2e534-4621-42b2-af34-67c49e19a879)
 
-![certificate2](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/f1d4e5c5-3a77-4145-80d6-940c598b191b)
+![certificate2](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/f1d4e5c5-3a77-4145-80d6-940c598b191b)
 
-![certificate3](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/5e2b6cc7-8354-4c2c-842c-1351ab7f9473)
+![certificate3](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/5e2b6cc7-8354-4c2c-842c-1351ab7f9473)
 
 After the SSL Certificate was created I clicked into it, scrolled down and selected the "Create Records in Route53" option.
 
-![SSL issued](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/b484b231-c6bd-4dcb-bb97-fb8cfd482604)
+![SSL issued](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/b484b231-c6bd-4dcb-bb97-fb8cfd482604)
 
-![Record](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/c1dcace8-ed79-46a7-baf7-60a754563f69)
+![Record](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/c1dcace8-ed79-46a7-baf7-60a754563f69)
 
 # Edit the Loadbalancer
 
@@ -896,11 +896,11 @@ After creating these listeners I then delete the other 2 I previously had.
 
 Then I added a new rule to the https:443 listener. I added it on the http header `api.sircloudsalot.xyz` to forward the backend-flask target group.
 
-![New rules](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/1c474ce3-c2fd-4ac0-ba87-c68a448b7e85)
+![New rules](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/1c474ce3-c2fd-4ac0-ba87-c68a448b7e85)
 
 The next thing I did was create two new records in Route53 to point it to my loadbalancer. One for the naked domain and the other for the api subdomain.
 
-![image](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/e021e7b5-736b-41f6-809e-c46563bf0646)
+![image](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/e021e7b5-736b-41f6-809e-c46563bf0646)
 
 The screenshot shows the configurations.
 
@@ -912,9 +912,9 @@ I used curl to check that my configurations are in order
 curl https://api.sircloudsalot.xyz/api/health-check
 ```
 
-![health-check](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/73ba31df-17d9-47a7-a079-566919eea8dc)
+![health-check](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/73ba31df-17d9-47a7-a079-566919eea8dc)
 
-![sircloudsalot](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/44b513d6-e828-4934-b8ee-f0de74012c60)
+![sircloudsalot](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/44b513d6-e828-4934-b8ee-f0de74012c60)
 
 # Update origins and Rebuild image
 
@@ -1125,4 +1125,4 @@ To round but this week we implemented changes to the timezone so that our app ti
 
 We extracted the timezone block of code to have its own file and imported the functions into the necessary files.
 
-Changes made can be seen in [this commit](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/commit/a89476892134220999df2175d9996d22ffbc34ad)
+Changes made can be seen in [this commit](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/commit/a89476892134220999df2175d9996d22ffbc34ad)

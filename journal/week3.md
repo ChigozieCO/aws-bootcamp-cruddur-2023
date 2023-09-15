@@ -9,13 +9,13 @@ I created a Cognito user pool through the AWS management console.
 - Select security, Identity and compliance
 - Click Cognito
 
-![AWS Management console](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/e741e3d0-74fe-42ab-aab8-98ce7c8b9e1a)
+![AWS Management console](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/e741e3d0-74fe-42ab-aab8-98ce7c8b9e1a)
 
 - Click on "create user pool" and follow all the steps to create a user pool.
 
 Once a user pool is created, it would appear on your Cognito dashboard as seen below:
 
-![Cognito user pool](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/72551544-e8af-4bec-b222-195d61569a4a)
+![Cognito user pool](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/72551544-e8af-4bec-b222-195d61569a4a)
 
 # Configure Amplify
 
@@ -283,7 +283,7 @@ import { Auth } from 'aws-amplify';
 
 All these changes made it possible for users to create accounts and interact with the app.
 
-![App users](https://github.com/TheGozie/aws-bootcamp-cruddur-2023/assets/107365067/38fd9929-fcb8-4e84-847b-f6eff329c713)
+![App users](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/38fd9929-fcb8-4e84-847b-f6eff329c713)
 
 
 # Cognito Json Web Token for the Backend
