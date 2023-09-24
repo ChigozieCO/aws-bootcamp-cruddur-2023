@@ -1,4 +1,4 @@
-![convo1](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/97b84c2a-41a6-4408-87d3-40f18b02d5c3)# Week 5 — DynamoDB and Serverless Caching
+# Week 5 — DynamoDB and Serverless Caching
 
 I started this week by rearranging my file structure.
 
