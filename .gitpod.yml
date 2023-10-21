@@ -46,10 +46,6 @@ tasks:
   - name: sharp
     command: |
       source "$THEIA_WORKSPACE_ROOT/bin/avatar/sharp"
-      
-  - name: docker
-    command: |
-      source "$THEIA_WORKSPACE_ROOT/bin/ecr/login"
 
 vscode:
   extensions:
