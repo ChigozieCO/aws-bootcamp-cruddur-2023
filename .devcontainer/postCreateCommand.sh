@@ -29,3 +29,6 @@ npm install aws-cdk -g && cd /workspaces/aws-bootcamp-cruddur-2023/thumbing-serv
 
 # Sharp
 source /workspaces/aws-bootcamp-cruddur-2023/bin/avatar/sharp
+
+# Login to ecr
+source /workspaces/aws-bootcamp-cruddur-2023/bin/ecr/login

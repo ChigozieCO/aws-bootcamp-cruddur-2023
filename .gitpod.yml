@@ -7,13 +7,13 @@ tasks:
 
   - name: react-js
     command: |
-      source "$THEIA_WORKSPACE_ROOT/bin/frontend/generate-env"
+      "$THEIA_WORKSPACE_ROOT/bin/frontend/generate-env"
       cd /workspace/aws-bootcamp-cruddur-2023/frontend-react-js
       npm i 
 
   - name: flask
     command: |
-      source "$THEIA_WORKSPACE_ROOT/bin/backend/generate-env"
+      "$THEIA_WORKSPACE_ROOT/bin/backend/generate-env"
       cd backend-flask
       pip install -r requirements.txt
   
@@ -47,6 +47,10 @@ tasks:
     command: |
       source "$THEIA_WORKSPACE_ROOT/bin/avatar/sharp"
       
+  - name: docker
+    before: |
+      source "$THEIA_WORKSPACE_ROOT/bin/ecr/login"
+
 vscode:
   extensions:
     - 42Crunch.vscode-openapi
