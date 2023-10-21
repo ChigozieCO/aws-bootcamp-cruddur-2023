@@ -1,8 +1,8 @@
 # Week 8 — Serverless Image Processing
 
-Serverless Image Processing
+We started week 8 by implementing our Serverless Image Processing with the AWS CDK.
 
-CDK - Cloud development kit
+# CDK - Cloud development kit
 
 It is an Infrastructure as code tool (IaC)
 
@@ -37,7 +37,7 @@ cdk init app --language typescript
 
 We are specifying typescript cos that's the language will are using.
 
-<<<<<<<<<<<<<<<<<<<<<<<<<<<< image 1 >>>>>>>>>>>>>>>>>>>>>>>>>>>
+![1](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/d10382a3-667b-4cf4-9202-b3f2b7dae211)
 
 After initialising cdk we would see a list of files and folders that has been created specifically for this project. In the `thumbing-serverless-cdk-stack.ts` is where we would define all our infrastructure.
 
@@ -78,7 +78,7 @@ cdk synth
 
 It is good practice to run this command often before provisioning resources to correct any errors we might have introduced in our code. Synthesizing our code will output a `cdk.out` directory that will show what exactly it is we are building. It is great sanity check before you start doing deployments.
 
-<<<<<<<<<<<<<<<<<<<<<<<<<<<< image 2 >>>>>>>>>>>>>>>>>>>>>>>>>>>
+![2](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/9655333f-4c50-4823-b947-13997d320bd1)
 
 # Bootstrap
 
@@ -90,9 +90,9 @@ cdk bootstrap ‘aws://<aws account id>/<aws region you want to use>’
 
 Bootstrapping is the process of provisioning resources of AWS cdk before you can deploy cdk apps. 
 
-<<<<<<<<<<<<<<<<<<<<<<<<<<<< image 3 >>>>>>>>>>>>>>>>>>>>>>>>>>>
+![3](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/de44ec54-de3b-4382-83fa-e624f8202ce2)
 
-<<<<<<<<<<<<<<<<<<<<<<<<<<<< image 4 >>>>>>>>>>>>>>>>>>>>>>>>>>>
+![4](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/568fedf2-d25d-4173-9b3d-025189782320)
 
 
 # Deploy
@@ -103,9 +103,9 @@ After bootstrapping your account you can now go ahead to deploy our resource on 
 cdk deploy
 ```
 
-<<<<<<<<<<<<<<<<<<<<<<<<<<<< image 5 >>>>>>>>>>>>>>>>>>>>>>>>>>>
+![5](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/fc5dc177-7bc5-4264-950d-e777f691b5fa)
 
-<<<<<<<<<<<<<<<<<<<<<<<<<<<< image 6 >>>>>>>>>>>>>>>>>>>>>>>>>>>
+![6](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/61b03ea8-7edb-4548-8ff0-48e7c2736afc)
 
 # Define Lambda Function
 
@@ -173,7 +173,7 @@ THUMBING_S3_FOLDER_OUTPUT="/avatars/processed"
 
 With these changes, when I run `cdk synth` again I can see the added resources to my stack.
 
-<<<<<<<<<<<<<<<<<<<<<<<<<<<< image 7 >>>>>>>>>>>>>>>>>>>>>>>>>>>
+![7](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/f0c3805f-c8fa-4f32-a06c-9a5026f24853)
 
 The above solution, the `.env` file , will work until we reload our IDE because we have added `.env` files to our `.gitignore` file and so won't have it anymore.
 
@@ -337,21 +337,23 @@ First I created an empty init file in the `aws/lambdas/process-images` directory
 npm init -y
 ```
 
-<<<<<<<<<<<<<<<<<<<<<<<<<<<< image 8 >>>>>>>>>>>>>>>>>>>>>>>>>>>
+![8](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/5d46791f-91c7-4de0-a12f-a6758c19747b)
+
 The first thing I then installed was the sharp
 
 ```sh
 npm install sharp
 ```
 
-<<<<<<<<<<<<<<<<<<<<<<<<<<<< image 9 >>>>>>>>>>>>>>>>>>>>>>>>>>>
+![9](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/2b70a52f-fabd-425c-8e49-74202367e1bc)
+
 We also need to have the sdk installed to use it locally. So we run the below code:
 
 ```sh
 npm i @aws-sdk/client-s3
 ```
 
-<<<<<<<<<<<<<<<<<<<<<<<<<<<< image 10 >>>>>>>>>>>>>>>>>>>>>>>>>>>
+![10](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/3915efa4-08f8-4386-b675-4de282519197)
 
 # Deploy 
 
@@ -362,7 +364,7 @@ cd thumbing-serverless-cdk
 cdk deploy
 ```
 
-<<<<<<<<<<<<<<<<<<<<<<<<<<<< image 11 >>>>>>>>>>>>>>>>>>>>>>>>>>>
+![11](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/4e46aa88-f8a1-491d-8a60-54051b34e074)
 
 After deploying the Lambda code we need to build out sharp in a particular for deployment for our lambda to work. We do this with the following steps:
 
@@ -408,7 +410,7 @@ I also added the code to the `devContainer` file so that in the case where I use
 source /workspaces/aws-bootcamp-cruddur-2023/bin/serverless/sharp
 ```
 
-<<<<<<<<<<<<<<<<<<<<<<<<<<<< image 12 >>>>>>>>>>>>>>>>>>>>>>>>>>>
+![12](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/bd81f58a-4e49-40ee-9fc0-4db02d2888a9)
 
 To help us remember the set of command we made a `serverless/build` script (link to the script)
 
@@ -437,9 +439,9 @@ I went ahead to deploy once again.
 cdk deploy
 ```
 
-<<<<<<<<<<<<<<<<<<<<<<<<<<<< image 13 >>>>>>>>>>>>>>>>>>>>>>>>>>>
+![13](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/1fac38b3-4176-4334-8532-f53f6bf0f871)
 
-<<<<<<<<<<<<<<<<<<<<<<<<<<<< image 14 >>>>>>>>>>>>>>>>>>>>>>>>>>> 
+![14](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/f6d58892-37fd-4246-92b6-bcef108e9725)
 
 
 # Import Bucket
@@ -476,7 +478,7 @@ We also went ahead and created the S3 bucket manually so that the bucket is avai
 
 I also created two folders in the S3 bucket manually
 
-<<<<<<<<<<<<<<<<<<<<<<<<<<<< image 15 >>>>>>>>>>>>>>>>>>>>>>>>>>>
+![15](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/5ddf3027-c93b-47dc-bca1-0b5792b629e3)
 
 
 # Scripts 
@@ -492,7 +494,7 @@ export DOMAIN_NAME=sircloudsalot.xyz
 gp env DOMAIN_NAME=sircloudsalot.xyz
 ```
 
-`upload`
+### `upload`
 
 ```sh
 
@@ -506,9 +508,7 @@ aws s3 cp "$DATA_FILE_PATH" "s3://assets.$DOMAIN_NAME/avatars/original/data.jpg"
 
 ```
 
-
-`clear`
-
+### `clear`
 
 ```sh
 
@@ -555,7 +555,6 @@ const s3ReadWritePolicy = this.createPolicyBucketAccess(bucket.bucketArn)
 To attach this policy we just created, we add this line if code to the stack
 
 ```ts
-
 lambda.addToRolePolicy(s3ReadWritePolicy);
 ```
 
@@ -629,17 +628,30 @@ import * as subscriptions from 'aws-cdk-lib/aws-sns-subscriptions';
  
  Origin domain - we used our assets bucket
  Origin access - Origin access control settings (recommended)
- 					We created new control settings as shown below
  
- <<<<<<<<<<<<<<<<<<<<<<<<<<<< image 16 >>>>>>>>>>>>>>>>>>>>>>>>>>>
+ We created new control settings as shown below
+ 
+![16](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/75d8fc43-7d6b-451a-8d0f-cb8e286cc7c9)
  
  We left everything as default until we got to the Viewer option
  
  Viewer - Select Redirect HTTP to HTTPS
  
  The rest of the selection can be seen from the screenshots below.
- 
- <<<<<<<<<<<<<<<<<<<<<<<<<<<< image 17, 18, 19, 20, 21, 22, 23 >>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+ ![17](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/28c40e39-5e63-4138-bef5-9d944a5da31f)
+
+ ![18](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/a02bde9b-61ab-4627-b042-a6468d7e51f5)
+
+![19](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/4342f9df-1295-4841-b283-e65687263261)
+
+![20](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/d343394c-71a2-48ce-8fd8-69dffb3f3a43)
+
+![21](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/5abaf9be-2808-4eba-bf51-64cdba930336)
+
+![22](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/697bb168-2745-4914-9d47-1f149aa2b6cd)
+
+![23](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/fad6f6af-966f-4e20-a7bc-f48a6593b3c7)
  
  ### Give the S3 Bucket the Necessary Permission
  
@@ -670,6 +682,7 @@ import * as subscriptions from 'aws-cdk-lib/aws-sns-subscriptions';
             }
         ]
       }
+```
 
 - Save changes
  
@@ -685,7 +698,7 @@ import * as subscriptions from 'aws-cdk-lib/aws-sns-subscriptions';
 - Choose the  distribution we just created in the next drop-down
 - Click on `create record`
 
-<<<<<<<<<<<<<<<<<<<<<<<<<<<< image 24 >>>>>>>>>>>>>>>>>>>>>>>>>>>
+![24](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/5f40684a-baa3-4332-a373-d91b519dec18)
 
 ### Test Test Test
 
@@ -695,7 +708,7 @@ assets.sircloudsalot.xyz/avatars/processed/data.xyz
 
 From the screenshot below I can see that the changes work.
 
-<<<<<<<<<<<<<<<<<<<<<<<<<<<< image 25 >>>>>>>>>>>>>>>>>>>>>>>>>>>
+![25](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/b7f651f4-1241-4ddd-b231-dba56fd78321)
 
 # Reconfigure Architecture
 
@@ -703,7 +716,7 @@ Along the line we decided we didn't want the unprocessed image accessible to the
 
 Below we can see our restructured buckets
 
-<<<<<<<<<<<<<<<<<<<<<<<<<<<< image 26 >>>>>>>>>>>>>>>>>>>>>>>>>>>
+![26](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/384e8e6f-0dc9-438e-937a-848aeb9219fb)
 
 I then update my `clear` script and my `upload` scripts to reflect the infrastructure change.
 
@@ -755,14 +768,14 @@ Then I upload the image using the `upload` script
 ./bin/avatar/upload
 ```
 
-<<<<<<<<<<<<<<<<<<<<<<<<<<<< image 27 >>>>>>>>>>>>>>>>>>>>>>>>>>>
+![27](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/0f346156-8e7c-4279-b66a-9cc1ca7e843e)
 
 The image above shows that the upload script ran successfully and uploaded the image to the `sircloudsalot-uploaded-avatars` bucket and the image below shows the processed image in the `assets.sircloudsalot.xyz` bucket.
 
-<<<<<<<<<<<<<<<<<<<<<<<<<<<< image 28 >>>>>>>>>>>>>>>>>>>>>>>>>>>
+![28](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/f53eaf8c-4ed7-4dc4-9273-ce88c08cd529)
 
 
-# Create a Place to Upload our Avatar
+# Create Placeholder for Avatar and Configure Profile Page
 
 For the next changes we want to implement, we decided to first test out our changes in our local environment. 
 
@@ -806,9 +819,35 @@ when the containers are running, load schema using the scripts
 ./bin/ddb/schema-load
 ./bin/ddb/seed
 
-Log in to cruddur
+Then I logged in to cruddur.
 
-I then head back to my codebase and in `backend-flask/db/sql` I make a new sql file called `show.sql`
+Then we started working on the app, we created a placeholder for our avatar, added an edit profile button, added profile header to our application.
 
-```sql
+These changes was made possible by making a bunch of changes to our colde base and all these changes can be seen in [this commit](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/commit/75340240b92beefa459246fb7340f92e67610892).
+
+At the end, my profile was looking very good, as can be seen in the image below.
+
+![29](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/1616bae2-5f0f-4faf-b94f-506a1df27e22)
+
+# Implement Edit Profile Popup and Implement Bio
+
+Having implemented avater and profile header image and adding an edit profile button we still needed to make the button functional.
+
+All through [this commit](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/commit/d8f286abafb8df798d60b7e4d8f17cb2b359b65e) implemented bio migrations and added a popup for our edit button.
+
+Now when you click the `edit profile` button there would be a popup where you can edit your display name and your bio.
+
+Shown in the image below
+
+![30](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/cf1b39db-91c9-49dd-988a-38e569463205)
+
+There was still now work after this tho because now we could edit the bio but we initially didn't have any spot for a bio in our profile.
+
+We coded that into our application and refreshed the app and our bio was now visible, as shown below.
+
+![31](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/ae8f51d1-c8d8-4070-937f-03d7fc2c8e7b)
+
+
+
+
 
