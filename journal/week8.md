@@ -848,6 +848,134 @@ We coded that into our application and refreshed the app and our bio was now vis
 ![31](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/ae8f51d1-c8d8-4070-937f-03d7fc2c8e7b)
 
 
+# Implement the Client Side JavaScript Upload for S3
 
+We need to first generate a presigned url that we are going to use.
 
+The way we will trigger this is to first have a file upload, once the file is attached we call call an API endpoint to our server to give us back a presigned url for a particular location.
 
+This is then be used to do the upload.
+
+We decided to use the AWS API Gateway to make the API call and in other to create one we need to have a lambda authorizer and so we need to create a new Lambda function.
+
+We will do this via gitops on the AWS management console.
+
+<<<<<<<<<<<<<<<<<<<<<<<<<<< image 1 >>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+The settings of the Lambda can be seen in the image above.
+
+I created a [function.rb](<<<<<insert url>>>>>) in the `aws/lambdas/cruddur-upload-avatar` directory that will hold our lambda code.
+
+I also generated a gemfile to work with Ruby in that directory by running the command:
+
+```sh
+bundle init
+```
+
+In the Gemfile I added:
+
+```rb
+gem "aws-sdk-s3"
+gem "ox"
+```
+
+Then ran `bundle install` to install the libraries.
+
+I exported the necessary env vars
+
+```sh 
+export UPLOADS_BUCKET_NAME="sircloudsalot-uploaded-avatars"
+gp env UPLOADS_BUCKET_NAME="sirclouds
+alot-uploaded-avatars"
+```
+
+In the function.rb file I added the below code:
+
+```rb
+require 'aws-sdk-s3'
+
+s3 = Aws::S3::Resource.new
+bucket_name = ENV["UPLOADS_BUCKET_NAME"]
+object_key = 'mock.jpg'
+
+obj = s3.bucket(bucket_name).object(object_key)
+url = obj.presigned_url(:put, expires_in: 60 * 5)
+puts url
+```
+
+Then ran the command below to generate the presigned url.
+
+```sh
+bundle exec ruby function.rb
+```
+
+To test out that our presigned works we used Thunder Client extension, a postman alternative and we can see it returns a 200.
+
+At first we failed to inidacte the `PUT` method and so it returned an error.
+
+<<<<<<<<<<<<<<<<<<<<<<< image 2 >>>>>>>>>>>>>>>>>>>>>>>
+
+I then headed to my bucket to verify if it was really uploaded and I can see that the image is there.
+
+<<<<<<<<<<<<<<<<<<<<<<<<<<<< image 3 >>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+We refactored our lambda code, you can see the code [here](<<<<<<insert function.rb repo url>>>>>>)
+
+Then added the necessary permissions to my Lambda, which is basically `S3:putObject` as seen below:
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": "s3:PutObject",
+            "Resource": "arn:aws:s3:::sircloudsalot-uploaded-avatars/*"
+        }
+    ]
+}
+```
+
+I added the `UPLOADS_BUCKET_NAME` as an environment variable in my lambda.
+
+Then edit the runtime setting to set the handler as `function.handler`
+
+<<<<<<<<<<<<<<<<<<<<<<<<< image 4 >>>>>>>>>>>>>>>>>>>>>>>>>
+
+We also need to have a lambda authorizer and we put the code for this in the [`lambda/lambda-authorizer/index.js`](<<<<<<<<<<<<<url for this file>>>>>>>>>>>>>) file.
+
+Then installed the package.json files in that directory:
+
+```sh
+cd lambdas/lambda-authorizer
+npm i aws-jwt-verify --save
+```
+
+We need now have 3 files and a folder in that directory
+
+```
+aws/lambdas/lambda-authorizer
+├── index.js
+├── node_modules
+│   ├── aws-jwt-verify
+│   └── .package-lock.json 
+├── package.json
+└── package-lock.json
+```
+
+We download these files into our local computer, zip them and then head over to AWS to create a new Lambda function called `CruddurApiGatewayLambdaAuthorizer` and upload the zip file into the new lambda function.
+
+Now we  build a Http Api in AWS API Gateway with the below configurations
+
+<<<<<<<<<<<<<<<<<<<<<<<<<<<< image 5 >>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+Then we create an authorizer with the below config
+
+<<<<<<<<<<<<<<<<<<<<<<<< image 6 >>>>>>>>>>>>>>>>>>>>>>>>
+
+Then attach it to the GET command.
+
+Back in our `ProfileForm.js` we implemented the upload avatar placeholder
+
+<<<<<<<<<<<<<<<<<< image 7 >>>>>>>>>>>>>>>>>>
