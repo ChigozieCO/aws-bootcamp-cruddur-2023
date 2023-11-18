@@ -4,6 +4,7 @@ tasks:
       AWS_CLI_AUTO_PROMPT: on-partial
     before: |
       source "$THEIA_WORKSPACE_ROOT/bin/install_aws_cli"
+      bash bin/ecr/login
 
   - name: react-js
     command: |

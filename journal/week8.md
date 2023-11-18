@@ -974,8 +974,44 @@ Then we create an authorizer with the below config
 
 <<<<<<<<<<<<<<<<<<<<<<<< image 6 >>>>>>>>>>>>>>>>>>>>>>>>
 
-Then attach it to the GET command.
+Then attach it to the POST method.
 
 Back in our `ProfileForm.js` we implemented the upload avatar placeholder
 
 <<<<<<<<<<<<<<<<<< image 7 >>>>>>>>>>>>>>>>>>
+
+I tested the presignedUrl with my lambda functions but I encourted a lot of errors, first I had CORS errors which we solved by adding a `{/proxy+}` route with OPTION method, the CruddurAvatarUpload Lambda as intergration and no authorizers.
+
+The next error I was encoutering was a 500 error, I fixed this by add the `USER_POOL_ID` and `CLIENT_ID` as environment variables in the CruddurApiGatewayLambdaAuthorizer Lambda function.
+
+This wasn't the end of my problems as now I was getting a 403 error. After combing through discord for days I was able to discover that the issue was my CruddurApiGatewayLambdaAuthorizer Lambda function was missing the `split` command which helps return the jwt correctly.
+
+Once I added the below line of code to my function code I was able to see the presigned url.
+
+```js
+const jwt = auth.split(" ")[1]
+```
+
+<<<<<<<<<<<<<<<<<<<<<<<< image 8 >>>>>>>>>>>>>>>>>>>>>>>
+
+# Integrate the Presigned URL
+
+After successfully testing and getting back our presigned url we need to integrate it into the code so that it is passed along as soon as it is generated.
+
+In `s3upload async event` in the `ProfileForm.js` I added the below line of code:
+
+```js
+    presignedurl = await s3uploadkey()
+    console.log(presignedurl)
+```
+
+And then where I have `const backend_url=""` within a try I replace it with the below code:
+
+```js
+      const res = await fetch(presignedurl, {..})
+```
+And once it is success we set it with the below line of code:
+
+```js
+        setPresignedurl(data.url)
+```
