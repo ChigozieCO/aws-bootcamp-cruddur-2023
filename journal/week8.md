@@ -1015,3 +1015,24 @@ And once it is success we set it with the below line of code:
 ```js
         setPresignedurl(data.url)
 ```
+
+# Fix Cors Issues
+In my `uploaded avatars` bucket I added a CORS configuration, shown below:
+
+```json
+[
+  {
+      "AllowedHeaders": ["*"],
+      "AllowedMethods": ["PUT"],
+      "AllowedOrigins": [
+        "https://*.gitpod.io"
+      ],
+      "ExposeHeaders": [
+          "x-amz-server-side-encryption",
+          "x-amz-request-id",
+          "x-amz-id-2"
+      ],
+      "MaxAgeSeconds": 3000
+  }
+]
+```
