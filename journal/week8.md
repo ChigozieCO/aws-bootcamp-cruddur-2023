@@ -860,11 +860,11 @@ We decided to use the AWS API Gateway to make the API call and in other to creat
 
 We will do this via gitops on the AWS management console.
 
-<<<<<<<<<<<<<<<<<<<<<<<<<<< image 1 >>>>>>>>>>>>>>>>>>>>>>>>>>>
+![1](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/85d9c6bb-e1a9-487e-b35d-3cea544c9a58)
 
 The settings of the Lambda can be seen in the image above.
 
-I created a [function.rb](<<<<<insert url>>>>>) in the `aws/lambdas/cruddur-upload-avatar` directory that will hold our lambda code.
+I created a `function.rb` in the `aws/lambdas/cruddur-upload-avatar` directory that will hold our lambda code.
 
 I also generated a gemfile to work with Ruby in that directory by running the command:
 
@@ -913,13 +913,13 @@ To test out that our presigned works we used Thunder Client extension, a postman
 
 At first we failed to inidacte the `PUT` method and so it returned an error.
 
-<<<<<<<<<<<<<<<<<<<<<<< image 2 >>>>>>>>>>>>>>>>>>>>>>>
+![2](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/e53f903b-1df9-4477-acc6-82cd5ef9eb40)
 
 I then headed to my bucket to verify if it was really uploaded and I can see that the image is there.
 
-<<<<<<<<<<<<<<<<<<<<<<<<<<<< image 3 >>>>>>>>>>>>>>>>>>>>>>>>>>>>
+![3](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/bcd27fbc-d354-4440-bb88-f6af9d7dd468)
 
-We refactored our lambda code, you can see the code [here](<<<<<<insert function.rb repo url>>>>>>)
+We refactored our lambda code.
 
 Then added the necessary permissions to my Lambda, which is basically `S3:putObject` as seen below:
 
@@ -941,9 +941,9 @@ I added the `UPLOADS_BUCKET_NAME` as an environment variable in my lambda.
 
 Then edit the runtime setting to set the handler as `function.handler`
 
-<<<<<<<<<<<<<<<<<<<<<<<<< image 4 >>>>>>>>>>>>>>>>>>>>>>>>>
+![4](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/4a6b48fb-5fd3-4a8c-9b54-33d84b4ea22d)
 
-We also need to have a lambda authorizer and we put the code for this in the [`lambda/lambda-authorizer/index.js`](<<<<<<<<<<<<<url for this file>>>>>>>>>>>>>) file.
+We also need to have a lambda authorizer and we put the code for this in the [`lambda/lambda-authorizer/index.js`](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/blob/main/aws/lambdas/lambda-authorizer/index.js) file.
 
 Then installed the package.json files in that directory:
 
@@ -968,17 +968,17 @@ We download these files into our local computer, zip them and then head over to 
 
 Now we  build a Http Api in AWS API Gateway with the below configurations
 
-<<<<<<<<<<<<<<<<<<<<<<<<<<<< image 5 >>>>>>>>>>>>>>>>>>>>>>>>>>>>
+![5](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/7d5ce199-1beb-4504-bef2-f7313e14c3ea)
 
 Then we create an authorizer with the below config
 
-<<<<<<<<<<<<<<<<<<<<<<<< image 6 >>>>>>>>>>>>>>>>>>>>>>>>
+![6](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/4de555af-79dd-4b7a-a63c-86570ef299ef)
 
 Then attach it to the POST method.
 
 Back in our `ProfileForm.js` we implemented the upload avatar placeholder
 
-<<<<<<<<<<<<<<<<<< image 7 >>>>>>>>>>>>>>>>>>
+![7](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/9bcef074-0ec8-4558-8adf-1b07bc9a02be)
 
 I tested the presignedUrl with my lambda functions but I encourted a lot of errors, first I had CORS errors which we solved by adding a `{/proxy+}` route with OPTION method, the CruddurAvatarUpload Lambda as intergration and no authorizers.
 
@@ -992,7 +992,7 @@ Once I added the below line of code to my function code I was able to see the pr
 const jwt = auth.split(" ")[1]
 ```
 
-<<<<<<<<<<<<<<<<<<<<<<<< image 8 >>>>>>>>>>>>>>>>>>>>>>>
+![8](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/3aa80526-d55e-445b-8bc5-ee86c0753f53)
 
 # Integrate the Presigned URL
 
@@ -1009,11 +1009,6 @@ And then where I have `const backend_url=""` within a try I replace it with the 
 
 ```js
       const res = await fetch(presignedurl, {..})
-```
-And once it is success we set it with the below line of code:
-
-```js
-        setPresignedurl(data.url)
 ```
 
 # Fix Cors Issues
@@ -1037,10 +1032,10 @@ In my `uploaded avatars` bucket I added a CORS configuration, shown below:
 ]
 ```
 
-All the changes made to achieve this can be seen in [this commit](url)
+All the changes made to achieve this can be seen in [this commit](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/commit/c3804c2948a33e7d22313887f776ade89e3edf20) and [this commit](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/commit/d280afeb9c17f930d6452fadb273cc59a8cb9ed7)
 
 # Render the Avatar
 
-With the changes made in [this commit](url) we were able to successfully render our avatar.
+With the changes made in [this commit](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/commit/ed6e43db66ae6b5e0d87f3924ca8d70c8605251e) we were able to successfully render our avatar.
 
-<<<<<<<<<<<<<<<<<<< image 9 >>>>>>>>>>>>>>>>>>>
+![9](https://github.com/ChigozieCO/aws-bootcamp-cruddur-2023/assets/107365067/7e3d6abf-b84a-4bf6-87d1-c9f3d1064f43)
