@@ -1036,3 +1036,11 @@ In my `uploaded avatars` bucket I added a CORS configuration, shown below:
   }
 ]
 ```
+
+All the changes made to achieve this can be seen in [this commit](url)
+
+# Render the Avatar
+
+With the changes made in [this commit](url) we were able to successfully render our avatar.
+
+<<<<<<<<<<<<<<<<<<< image 9 >>>>>>>>>>>>>>>>>>>
