@@ -29,6 +29,7 @@ env:
     CONTAINER_NAME: backend-flask
     IMAGE_URL: 436522428111.dkr.ecr.us-east-1.amazonaws.com
     REPO_NAME: backend-flask:latest
+    ECR_PYTHON_URL: 436522428111.dkr.ecr.us-east-1.amazonaws.com/cruddur-python
 artifacts:
   files:
     - imagedefinitions.json
